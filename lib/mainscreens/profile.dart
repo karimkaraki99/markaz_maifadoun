@@ -12,10 +12,13 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   @override
+  bool _isPressed = false;
+  String _profile = 'Profile';
+  String _editProfile = 'Edit Profile';
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile', style: TextStyle(color: darkBlue)),
+        title: Text(!_isPressed?_profile:_editProfile, style: TextStyle(color: darkBlue)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -66,98 +69,207 @@ class _ProfileState extends State<Profile> {
           ),
           Positioned(
             top: MediaQuery.of(context).padding.top +
-                AppBar().preferredSize.height+20,
+                AppBar().preferredSize.height,
             left: 0,
             right: 0,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: Container(
-                      width: 130,
-                      height: 130,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color:yellow,
-                          width: 4.0,
-                        ),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Container(
+                              width: 170,
+                              height: 170,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color:yellow,
+                                  width: 4.0,
+                                ),
+                              ),
+                              child: const CircleAvatar(
+                                radius: 50,
+                                backgroundImage: AssetImage('assets/test_profile.png'),
+                              ),
+                            ),
+                          ),
+                          _isPressed?IconButton(onPressed: (){}, icon: Icon(Icons.camera_alt , size: 40,color: yellow,)):Container()
+                        ],
                       ),
-                      child: const CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage('assets/test_profile.png'),
-                      ),
-                    ),
-                  ),
                   SizedBox(height: 20.0),
-                  Text(
-                    'Karim Karaki',
-                    style: TextStyle(fontSize: 24.0,fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    'Team Leader',
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                  const SizedBox(height: 20,),
-                  ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(blue),
-                        shape: MaterialStateProperty.all<OutlinedBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0)
-                          )
-                        ),
-                          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                            EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
-                          )
+                  !_isPressed?const Column(
+                    children: [
+                      Text(
+                        'Karim Karaki',
+                        style: TextStyle(fontSize: 24.0,fontWeight: FontWeight.bold),
                       ),
-                      onPressed: (){},
-                      child: Text('Edit Button',style: TextStyle(fontSize: 18),)),
-                  SizedBox(height: MediaQuery.of(context).size.height *0.025),
-                  Padding(
-                      padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 16.3, right: 16.3),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ValueBox(title: 'Phone', value: '70779006',),
-                      )
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ValueBox(title: 'Role|s', value: 'Team Leader',),
-                      )
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ValueBox(title: 'Duty', value: 'Friday',),
-                      )
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ValueBox(title: 'Since', value: '2022',),
-                      )
-                  ),
-                  Padding(
-                      padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ValueBox(title: 'Hours', value: '100',),
-                      )
-                  ),
+                      SizedBox(height: 8.0),
+                      Text(
+                        'Team Leader',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                      SizedBox(height: 20,),
+                    ],
+                  ):Container(),
+                  !_isPressed? CustomButton(text: _editProfile, color: blue, toDo: (){setState(() {
+                    _isPressed = true;
+                  });})
+                      :Container(),
+                  !_isPressed?ViewProfile():EditProfile(),
+                  _isPressed?Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                    CustomButton(text: 'Back', color: blue, toDo: (){ setState(() {_isPressed = false;});}),
+                    SizedBox(width: MediaQuery.of(context).size.width * 0.05,),
+                    CustomButton(text: 'Edit', color: green,
+                        toDo: (){ showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: green,
+                              title: Icon(Icons.check_circle ,size: 80, color: white,),
+                              content: Text('Profile updated successfully!',style: TextStyle(color: white),textAlign: TextAlign.center,),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop(); // Close the dialog
+                                    setState(() {
+                                      _isPressed = false; // Update the _isPressed state
+                                    });
+                                  },
+                                  child: Text('OK',style: TextStyle(color: white),),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                    })
+                  ],):Container(),
+
                 ],
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+}
+class ViewProfile extends StatefulWidget {
+   ViewProfile({super.key});
+
+  @override
+  State<ViewProfile> createState() => _ViewProfileState();
+}
+
+class _ViewProfileState extends State<ViewProfile> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+
+        SizedBox(height: MediaQuery.of(context).size.height *0.025),
+        Padding(
+            padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 16.3, right: 16.3),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ValueBox(title: 'Phone', value: '70779006',),
+            )
+        ),
+        Padding(
+            padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ValueBox(title: 'Role|s', value: 'Team Leader',),
+            )
+        ),
+        Padding(
+            padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ValueBox(title: 'Duty', value: 'Friday',),
+            )
+        ),
+        Padding(
+            padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ValueBox(title: 'Since', value: '2022',),
+            )
+        ),
+        Padding(
+            padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ValueBox(title: 'Hours', value: '100',),
+            )
+        ),
+      ],
+    );
+  }
+}
+class EditProfile extends StatefulWidget {
+  const EditProfile({super.key});
+
+  @override
+  State<EditProfile> createState() => _EditProfileState();
+}
+
+class _EditProfileState extends State<EditProfile> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+            padding: EdgeInsets.only(top: 10.0, bottom: 10.0, left: 16.3, right: 16.3),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: TextField(
+                cursorColor: yellow,
+                decoration: InputDecoration(
+                  labelText: 'First Name',
+                  labelStyle: TextStyle(color: darkGrey),
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(color: darkGrey),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    borderSide: BorderSide(color: darkGrey),
+                  ),
+                ),
+              )
+            )
+        ),
+        Padding(
+            padding: EdgeInsets.only(top: 10.0, bottom: 20.0, left: 16.3, right: 16.3),
+            child: Align(
+                alignment: Alignment.topCenter,
+                child: TextField(
+                  cursorColor: yellow,
+                  decoration: InputDecoration(
+                    labelText: 'Last Name',
+                    labelStyle: TextStyle(color: darkGrey),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: darkGrey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: darkGrey),
+                    ),
+                  ),
+                )
+            )
+        ),
+
+      ],
     );
   }
 }

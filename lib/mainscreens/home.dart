@@ -91,19 +91,68 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
-                ListTile(
-                  leading: Icon(Icons.exit_to_app,color: Colors.red,),
-                  title: Text('Logout',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
-                  onTap: () {
+          ListTile(
+            leading: Icon(Icons.exit_to_app, color: red),
+            title: Text('Logout', style: TextStyle(color: red, fontWeight: FontWeight.bold)),
+            onTap: () {
+              logOutFunction();
+            },
+          )
 
-                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
-                        LoginScreen()), (Route<dynamic> route) => false);
-
+          ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+  logOutFunction(){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: red,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.exit_to_app_outlined, size: 100, color: white),
+              SizedBox(height: 20),
+              Text('Are you sure?', style: TextStyle(color: white,fontSize: 25,fontWeight: FontWeight.bold)),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
+                    fixedSize: MaterialStateProperty.all<Size>(Size(120.0, 30.0)),
+                  ),
+                  child: Text('No', style: TextStyle(color: white)),
+                ),
+                const SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                          (Route<dynamic> route) => false,
+                    );
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(blue),
+                    fixedSize: MaterialStateProperty.all<Size>(Size(120.0, 30.0)),
+                  ),
+                  child: Text('Yes', style: TextStyle(color: white)),
                 ),
               ],
             ),
-          ),
+          ],
+
         );
       },
     );

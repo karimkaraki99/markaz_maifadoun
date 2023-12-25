@@ -343,6 +343,31 @@ class _ValueBoxState extends State<ValueBox> {
     );
   }
 }
+class CustomButton extends StatelessWidget {
+  String text;
+  VoidCallback toDo;
+  Color color;
+  CustomButton({super.key, required this.text,required this.color ,required this.toDo});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all<Color>(color),
+            shape: MaterialStateProperty.all<OutlinedBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0)
+                )
+            ),
+            padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+              EdgeInsets.symmetric(vertical: 12.0, horizontal: 32.0),
+            )
+        ),
+        onPressed: toDo,
+        child: Text(text,style: TextStyle(fontSize: 18),)
+    );
+  }
+}
 
 
 
