@@ -292,6 +292,58 @@ class _ImageButtonState extends State<ImageButton> {
     );
   }
 }
+class ValueBox extends StatefulWidget {
+  String title;
+  String value;
+   ValueBox({Key? key, required this.title, required this.value}) : super(key: key);
+
+  @override
+  State<ValueBox> createState() => _ValueBoxState();
+}
+
+class _ValueBoxState extends State<ValueBox> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.lightBlueAccent,
+        borderRadius: BorderRadius.circular(10)
+      ),
+      padding: EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          SizedBox(width: 5.0),
+          Text(
+            widget.title,
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18.0,
+              color: yellow
+            ),
+          ),
+          SizedBox(width: 12.0),
+          Container(
+            width: 1.0,
+            height: 20.0,
+            color: white,
+          ),
+          SizedBox(width: 12.0),
+          Text(
+            widget.value,
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              fontSize: 17.0,
+              color: white
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 
 
 

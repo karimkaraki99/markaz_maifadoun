@@ -15,13 +15,10 @@ class _activeMembersState extends State<activeMembers> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('active members'),
-      ),
       body: Column(
         children: [
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.02,
+            height: MediaQuery.of(context).size.height * 0.08,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -88,9 +85,10 @@ class _activeMembersState extends State<activeMembers> {
                   height: MediaQuery.of(context).size.height * 0.01,
                 ),
                 Container(
-                  height:  MediaQuery.of(context).size.height * 0.25,
+                  height: MediaQuery.of(context).size.height * 0.27,
+                  alignment: Alignment.topCenter,  // Align content to the top
                   child: ActiveMembers(),
-                ),
+                )
               ],
             ),
           ),
@@ -128,9 +126,11 @@ class _activeMembersState extends State<activeMembers> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.01,
                 ),
-                Container(
-                  height:  MediaQuery.of(context).size.height * 0.25,
-                  child: OnMissionMembers(),
+                IntrinsicHeight(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.27,
+                    child: OnMissionMembers(),
+                  ),
                 )
               ],
             ),
