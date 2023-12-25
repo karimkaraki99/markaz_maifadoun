@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "197241802386",
+    "project_id": "markaz-maifadoun-b258c",
+    "storage_bucket": "markaz-maifadoun-b258c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:197241802386:android:d51e1616f326cb415b204b",
+        "android_client_info": {
+          "package_name": "com.markaz.maifadoun"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsCZbQPSA1X-a3XJ_z_HitgmVS9K_Fu0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
