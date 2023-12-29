@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../database/vehicle.dart';
 import '../utils/colors_util.dart';
 import 'library.dart';
 import '../utils/reuseable_widget.dart';
@@ -18,35 +19,12 @@ class _activeMembersState extends State<activeMembers> {
       body: Column(
         children: [
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.08,
+            height: MediaQuery.of(context).size.height * 0.06,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              for (int i = 0; i < 5; i++)
-                Row(
-                  children: [
-                    Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: blue,
-                        ),
-                        child: IconButton(
-                            onPressed: () {
-                              // Add functionality here
-                            },
-                            icon: Icon(
-                              Icons.car_crash,
-                              color: white,
-                            ))),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.04,
-                    ),
-                  ],
-                )
-            ],
+          Container(
+            width:  MediaQuery.of(context).size.width * 1,
+            height: MediaQuery.of(context).size.height * 0.09,
+            child: CarsListScreen(),
           ),
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
@@ -222,3 +200,20 @@ class _OnMissionMembers extends State<OnMissionMembers> {
     );
   }
 }
+// class CarIcons extends StatefulWidget {
+//   const CarIcons({super.key});
+//
+//   @override
+//   State<CarIcons> createState() => _CarIconsState();
+// }
+//
+// class _CarIconsState extends State<CarIcons> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         CustomButton(text: text, color: color, toDo: toDo)
+//       ],
+//     );
+//   }
+// }

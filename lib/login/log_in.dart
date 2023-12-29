@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/mainscreens/home.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
+import '../database/vehicle.dart';
 import '../utils/image_utils.dart';
 import '../utils/reuseable_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -214,6 +215,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                       child: const Text("home", style: TextStyle(color: Colors.red),)
+                  ),TextButton(onPressed: (){
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context)=> CarsListScreen())
+                    );
+                  },
+                      child: const Text("Cars", style: TextStyle(color: Colors.red),)
                   )
                 ],
               ),

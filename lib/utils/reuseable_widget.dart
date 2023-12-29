@@ -368,6 +368,32 @@ class CustomButton extends StatelessWidget {
     );
   }
 }
+class CustomIconButton extends StatefulWidget {
+  String name;
+  String icon;
+  bool primaryBool;
+  bool secondaryBool;
+  VoidCallback toDo;
+   CustomIconButton({super.key,required this.name,required this.icon,required this.primaryBool,required this.secondaryBool,required this.toDo});
+
+  @override
+  State<CustomIconButton> createState() => _CustomIconButtonState();
+}
+
+class _CustomIconButtonState extends State<CustomIconButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        IconButton(
+            onPressed: widget.toDo,
+            icon: Image.asset(widget.icon,color: widget.secondaryBool?yellow:white,),
+          color: widget.primaryBool?blue:red,
+        ),
+      ],
+    );
+  }
+}
 
 
 
