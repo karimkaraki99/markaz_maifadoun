@@ -145,25 +145,26 @@ class TextBox extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
+
           Expanded(
             child: Text(
               '${title1}: ${value1}',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15.0, color: white),
+              style: TextStyle(fontSize: 13.0, color: white),
             ),
           ),
           Expanded(
             child: Text(
               '${title2}: ${value2}',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15.0, color: white),
+              style: TextStyle(fontSize: 13.0, color: white),
             ),
           ),
           Expanded(
             child: Text(
               '${title3}: ${value3}',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15.0, color: white),
+              style: TextStyle(fontSize: 13.0, color: white),
             ),
           ),
         ],
@@ -364,7 +365,7 @@ class CustomButton extends StatelessWidget {
             )
         ),
         onPressed: toDo,
-        child: Text(text,style: TextStyle(fontSize: 18),)
+        child: Text(text,style: TextStyle(fontSize: 18,color: white),)
     );
   }
 }
@@ -394,6 +395,7 @@ class _CustomIconButtonState extends State<CustomIconButton> {
     );
   }
 }
+
 
 
 

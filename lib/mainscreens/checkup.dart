@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
 
+import '../database/vehicle.dart';
 import '../utils/vehicle_checkup.dart';
 
 class CheckUp extends StatefulWidget {
@@ -22,7 +23,7 @@ class _CheckUpState extends State<CheckUp> {
           Align(
             alignment: Alignment.center,
             child: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
+              width: MediaQuery.of(context).size.width * 0.9,
               height: MediaQuery.of(context).size.height * 0.07,
               decoration: BoxDecoration(
                 color: darkBlue,
@@ -32,28 +33,40 @@ class _CheckUpState extends State<CheckUp> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
+                  SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+                  Expanded(child: ElevatedButton(
                     onPressed: () {
                       setState(() {
                         clinic = false;
                       });
                     },
-                    child: Text("Vehicle Checkup", style: TextStyle(color: white)),
+                    child: Expanded(child: Text("Vehicle Checkup", style: TextStyle(color: white,fontSize: 12)),),
                     style: ButtonStyle(
                       backgroundColor: clinic?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(5)
+                        )
+                      )
                     ),
-                  ),
-                  ElevatedButton(
+                  ),),
+                  Expanded(child: ElevatedButton(
                     onPressed: () {
                       setState(() {
                         clinic = true;
                       });
                     },
-                    child: Text("Clinic Checkup", style: TextStyle(color: white)),
+                    child: Expanded(child: Text("Clinic Checkup", style: TextStyle(color: white)),),
                     style: ButtonStyle(
                       backgroundColor: !clinic?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5)
+                          )
+                      )
                     ),
-                  ),
+                  ),),
+                  SizedBox(width: MediaQuery.of(context).size.width*0.02,),
                 ],
               ),
             ),
@@ -202,40 +215,11 @@ class _VehicleCheckupState extends State<VehicleCheckup> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            for (int i = 1; i <= 5; i++)
-              Row(
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: blue,
-                          ),
-                          child: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  checkupIndex = i-1;
-                                  _isPressed = true;
-                                });
-                              },
-                              icon: Icon(
-                                Icons.car_crash,
-                                color: white,
-                              ),
-                          style: ButtonStyle(backgroundColor: MaterialStateProperty.all<Color>(blue)),
-                          )
-                      ),
-                      Text('car ${i}')
-                    ],
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.04,
-                  ),
-                ],
-              )
+            SizedBox(
+              width:  MediaQuery.of(context).size.width * 1,
+              height: MediaQuery.of(context).size.height * 0.09,
+              child: CarsListScreen(),
+            ),
           ],
         ),
         SizedBox(height:MediaQuery.of(context).size.height * 0.04 ,),

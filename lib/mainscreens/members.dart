@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../database/users.dart';
 import '../database/vehicle.dart';
 import '../utils/colors_util.dart';
 import 'library.dart';
@@ -14,6 +15,12 @@ class activeMembers extends StatefulWidget {
 class _activeMembersState extends State<activeMembers> {
 
   @override
+  void initState() {
+    Users.initUsersLists();
+    super.initState();
+  }
+  bool isLoading = false;
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -21,7 +28,7 @@ class _activeMembersState extends State<activeMembers> {
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.06,
           ),
-          Container(
+          SizedBox(
             width:  MediaQuery.of(context).size.width * 1,
             height: MediaQuery.of(context).size.height * 0.09,
             child: CarsListScreen(),
@@ -29,13 +36,13 @@ class _activeMembersState extends State<activeMembers> {
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.02,
           ),
-          TextBox(
+          isLoading?CircularProgressIndicator(): TextBox(
             title1: 'Team Leader',
-            value1: 3,
+            value1: Users.activeTeamMemberUsersList.length,
             title2: 'Driver',
-            value2: 2,
+            value2: Users.activeDriverUsersList.length,
             title3: 'Members',
-            value3: 1,
+            value3:  Users.activeUsersList.length,
             height: 60,
             width: 350,
           ),
@@ -127,17 +134,7 @@ class Member {
 
   Member({required this.name, required this.role, required this.icon});
 }
-List<Member> members = [
-  Member(
-      name: 'Karim Karaki',
-      role: 'Team Leader',
-      icon: Icons.medical_services),
-  Member(name: 'Ali Test', role: 'Driver', icon: Icons.car_crash),
-  Member(name: 'Fadi Test', role: 'Paramedic', icon: Icons.medical_services),
-  Member(name: 'Shadi Test', role: 'EMT', icon: Icons.person),
-  Member(name: 'Rami Test', role: 'EMT', icon: Icons.person),
-  // Add more members as needed
-];
+
 List<Member> missionMembers = [
   Member(
       name: 'Karim Karaki',
@@ -157,24 +154,47 @@ class ActiveMembers extends StatefulWidget {
 }
 
 class _ActiveMembersState extends State<ActiveMembers> {
+  List<Users> _activeUsers = [];
+  late int activeNumber ;
+  @override
+  void initState() {
+    super.initState();
+    loadActiveUsers();
+  }
+
+  Future<void> loadActiveUsers() async {
+    List<Users> users = await Users.getActiveUsers();
+    setState(() {
+      _activeUsers = users;
+      int activeNumber = _activeUsers.length;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: members.length,
+    return Container(
+      child: ListView.builder(
+        itemCount: _activeUsers.length,
         scrollDirection: Axis.vertical,
-        itemBuilder: (context , index  ){
-          Member member = members[index];
+        itemBuilder: (context, index) {
+          Users user = _activeUsers[index];
           return ListTile(
-            leading: IconButton(onPressed: () {  }, icon: Icon(member.icon,color: yellow,),),
-            title: Text(member.name,style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold),),
-            subtitle: Text(member.role,style: TextStyle(color: darkGrey,fontWeight:FontWeight.w300),),
-            trailing: IconButton(onPressed: () {  }, icon: Icon(Icons.phone,color: green,),),
+            leading: Icon(user.isDriver?Icons.car_crash_sharp:(user.role ==2 || user.role ==1)?Icons.medical_services:Icons.person,color: yellow),
+            title: Text('${user.firstName} ${user.lastName}', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            subtitle:  Text('Role: ${user.userRole}', style: TextStyle(color: darkGrey,fontWeight:FontWeight.w300),),
+            trailing: IconButton(
+              onPressed: () {
+                // Perform action when the phone icon is pressed
+              },
+              icon: Icon(Icons.phone, color: Colors.green),
+            ),
           );
-        }
-
+        },
+      ),
     );
   }
 }
+
 class OnMissionMembers extends StatefulWidget {
   const OnMissionMembers({super.key});
 
@@ -186,7 +206,7 @@ class _OnMissionMembers extends State<OnMissionMembers> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: members.length,
+        itemCount: missionMembers.length,
         itemBuilder: (context , index  ){
           Member member = missionMembers[index];
           return ListTile(
@@ -200,20 +220,3 @@ class _OnMissionMembers extends State<OnMissionMembers> {
     );
   }
 }
-// class CarIcons extends StatefulWidget {
-//   const CarIcons({super.key});
-//
-//   @override
-//   State<CarIcons> createState() => _CarIconsState();
-// }
-//
-// class _CarIconsState extends State<CarIcons> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Row(
-//       children: [
-//         CustomButton(text: text, color: color, toDo: toDo)
-//       ],
-//     );
-//   }
-// }

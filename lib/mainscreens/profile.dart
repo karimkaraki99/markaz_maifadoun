@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../database/users.dart';
 import '../utils/colors_util.dart';
 import '../utils/reuseable_widget.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'edit_profile.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -11,35 +15,80 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  @override
-  bool _isPressed = false;
-  String _profile = 'Profile';
+  bool isLoading = true;
   String _editProfile = 'Edit Profile';
+  String name='';
+  String rank = '';
+  String role = '';
+  String phoneNumber = '';
+  String dutyDay='';
+  String dutyDay2='';
+  bool isDriver = false;
+  String year = '';
+  String driver = '';
+
+  Future<void> initializeData() async {
+    try {
+      await Users.initUsersLists();
+      await Users.initializeLoggedInUser();
+
+      setState(() {
+        name = '${Users.loggedInUser!.firstName} ${Users.loggedInUser!.lastName}';
+        rank = '${Users.loggedInUser!.userRank}';
+        role = '${Users.loggedInUser!.userRole}';
+        phoneNumber = '${Users.loggedInUser!.phoneNumber}';
+        dutyDay = '${Users.loggedInUser!.dutyDay}';
+        dutyDay2 = '${Users.loggedInUser!.dutyDay2}';
+        year = '${Users.loggedInUser!.year}';
+        isDriver = Users.loggedInUser?.isDriver ?? false;
+        if(isDriver){driver = '- Driver';}
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Error initializing data: $e");
+    }
+  }
+  @override
+  void initState() {
+    initializeData();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(!_isPressed?_profile:_editProfile, style: TextStyle(color: darkBlue)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body: Stack(
+      body:isLoading
+          ? SpinKitFadingCircle(
+        color: Colors.blue,
+        size: 50.0,
+      ): Stack(
         children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.25,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/profile_background.png'),
-                  fit: BoxFit.cover,
-                ),
+
+          Container(
+            height: MediaQuery.of(context).size.height * 0.25,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/profile_background.png'),
+                fit: BoxFit.cover,
               ),
             ),
           ),
+          AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: true,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios, color: white , weight:10 ,),
+              onPressed: () {
+               Navigator.pop(context);
+              },
+            ),
+            title: Text(
+             'Profile',
+              style: TextStyle(color: white,fontWeight: FontWeight.bold),
+            ),
+          ),
+
           Positioned(
             top: MediaQuery.of(context).padding.top +
                 AppBar().preferredSize.height+80,
@@ -97,76 +146,58 @@ class _ProfileState extends State<Profile> {
                               ),
                             ),
                           ),
-                          _isPressed?IconButton(onPressed: (){}, icon: Icon(Icons.camera_alt , size: 40,color: yellow,)):Container()
+                          IconButton(onPressed: (){}, icon: Icon(Icons.camera_alt , size: 40,color: yellow,))
                         ],
                       ),
                   SizedBox(height: 20.0),
-                  !_isPressed?const Column(
+                  Column(
                     children: [
                       Text(
-                        'Karim Karaki',
+                        name,
                         style: TextStyle(fontSize: 24.0,fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 8.0),
                       Text(
-                        'Team Leader',
+                        '$rank - $role $driver',
                         style: TextStyle(fontSize: 16.0),
                       ),
                       SizedBox(height: 20,),
                     ],
-                  ):Container(),
-                  !_isPressed? CustomButton(text: _editProfile, color: blue, toDo: (){setState(() {
-                    _isPressed = true;
-                  });})
-                      :Container(),
-                  !_isPressed?ViewProfile():EditProfile(),
-                  _isPressed?Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                    CustomButton(text: 'Back', color: blue, toDo: (){ setState(() {_isPressed = false;});}),
-                    SizedBox(width: MediaQuery.of(context).size.width * 0.05,),
-                    CustomButton(text: 'Edit', color: green,
-                        toDo: (){ showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              backgroundColor: green,
-                              title: Icon(Icons.check_circle ,size: 80, color: white,),
-                              content: Text('Profile updated successfully!',style: TextStyle(color: white),textAlign: TextAlign.center,),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(); // Close the dialog
-                                    setState(() {
-                                      _isPressed = false; // Update the _isPressed state
-                                    });
-                                  },
-                                  child: Text('OK',style: TextStyle(color: white),),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                    })
-                  ],):Container(),
+                  ),
+                  CustomButton(text: _editProfile, color: blue, toDo: (){
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => EditProfile(phoneNumber: phoneNumber,)),
+                    );
+                  }),
+                 ViewProfile(rank: rank, role: role, phoneNumber: phoneNumber, dutyDay: dutyDay, dutyDay2: dutyDay2, isDriver: isDriver, year: year)
 
                 ],
               ),
             ),
           ),
+
         ],
       ),
     );
   }
 }
 class ViewProfile extends StatefulWidget {
-   ViewProfile({super.key});
+  String rank;
+  String role ;
+  String phoneNumber;
+  String dutyDay;
+  String dutyDay2;
+  bool isDriver;
+  String year;
+   ViewProfile({super.key , required this.rank, required this.role,required this.phoneNumber,required this.dutyDay,required this.dutyDay2,required this.isDriver,required this.year});
 
   @override
   State<ViewProfile> createState() => _ViewProfileState();
 }
 
 class _ViewProfileState extends State<ViewProfile> {
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -177,99 +208,39 @@ class _ViewProfileState extends State<ViewProfile> {
             padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 16.3, right: 16.3),
             child: Align(
               alignment: Alignment.topCenter,
-              child: ValueBox(title: 'Phone', value: '70779006',),
+              child: ValueBox(title: 'Phone', value: widget.phoneNumber,),
             )
         ),
         Padding(
             padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
             child: Align(
               alignment: Alignment.topCenter,
-              child: ValueBox(title: 'Role|s', value: 'Team Leader',),
+              child: ValueBox(title: 'Role', value: widget.role,),
             )
         ),
         Padding(
             padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
             child: Align(
               alignment: Alignment.topCenter,
-              child: ValueBox(title: 'Duty', value: 'Friday',),
+              child: ValueBox(title: 'Rank', value: widget.rank,),
             )
         ),
         Padding(
             padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
             child: Align(
               alignment: Alignment.topCenter,
-              child: ValueBox(title: 'Since', value: '2022',),
+              child: ValueBox(title: 'Duty', value: '${widget.dutyDay} ${widget.dutyDay2}',),
             )
         ),
         Padding(
             padding: EdgeInsets.only(top: 10.0, bottom: 5.0, left: 16.3, right: 16.3),
             child: Align(
               alignment: Alignment.topCenter,
-              child: ValueBox(title: 'Hours', value: '100',),
+              child: ValueBox(title: 'Since', value: widget.year,),
             )
         ),
       ],
     );
   }
 }
-class EditProfile extends StatefulWidget {
-  const EditProfile({super.key});
 
-  @override
-  State<EditProfile> createState() => _EditProfileState();
-}
-
-class _EditProfileState extends State<EditProfile> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-            padding: EdgeInsets.only(top: 10.0, bottom: 10.0, left: 16.3, right: 16.3),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: TextField(
-                cursorColor: yellow,
-                decoration: InputDecoration(
-                  labelText: 'First Name',
-                  labelStyle: TextStyle(color: darkGrey),
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(color: darkGrey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(color: darkGrey),
-                  ),
-                ),
-              )
-            )
-        ),
-        Padding(
-            padding: EdgeInsets.only(top: 10.0, bottom: 20.0, left: 16.3, right: 16.3),
-            child: Align(
-                alignment: Alignment.topCenter,
-                child: TextField(
-                  cursorColor: yellow,
-                  decoration: InputDecoration(
-                    labelText: 'Last Name',
-                    labelStyle: TextStyle(color: darkGrey),
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: darkGrey),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: darkGrey),
-                    ),
-                  ),
-                )
-            )
-        ),
-
-      ],
-    );
-  }
-}

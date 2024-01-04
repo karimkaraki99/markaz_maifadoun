@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/login/log_in.dart';
 import 'package:markaz_maifadoun/mainscreens/profile.dart';
 import 'package:markaz_maifadoun/mainscreens/status.dart';
+import 'package:markaz_maifadoun/teamLeader/missions.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
+import '../database/users.dart';
 import 'checkup.dart';
 import 'library.dart';
 import 'members.dart';
@@ -15,7 +19,26 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0; // Initially selected index
+  int _currentIndex = 0;
+  int  role = 0;
+
+  Future<void> initializeData() async {
+    try {
+      await Users.initUsersLists();
+      await Users.initializeLoggedInUser();
+      setState(() {
+        role = Users.loggedInUser?.role ?? 0;
+        print('role is $role');
+      });
+    } catch (e) {
+      print("Error initializing data: $e");
+    }
+  }
+  @override
+  void initState() {
+    initializeData();
+    super.initState();
+  }
 
   final List<Widget> _pages = [
     activeMembers(),
@@ -57,6 +80,7 @@ class _HomePageState extends State<HomePage> {
         onTap: (index) {
           if (index == 4) {
             _showMenuBottomSheet(context);
+            initializeData();
           } else {
             setState(() {
               _currentIndex = index;
@@ -82,7 +106,20 @@ class _HomePageState extends State<HomePage> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 ListTile(
-                  leading: Icon(Icons.person, color: darkBlue,),
+                  leading: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15.0),
+                          topRight: Radius.circular(5.0),
+                          bottomLeft: Radius.circular(5.0),
+                          bottomRight: Radius.circular(10.0),
+                        ),
+                      color: blue
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(Icons.person, color: yellow,),
+                  ),
                   title: Text('Profile',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
                   onTap: () {
                     // Handle Settings button tap
@@ -91,8 +128,65 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
-          ListTile(
-            leading: Icon(Icons.exit_to_app, color: red),
+                role==0? ListTile(
+                  leading: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15.0),
+                          topRight: Radius.circular(5.0),
+                          bottomLeft: Radius.circular(5.0),
+                          bottomRight: Radius.circular(10.0),
+                        ),
+                        color: blue
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    child: Image.asset('assets/mission-icon.png',height: 25,width: 25,),
+                  ),
+                  title: Text('Missions',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context)=> const Missions()  )
+                    );
+                  },
+                ):Container(),
+                role>0? ListTile(
+                  leading: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(15.0),
+                          topRight: Radius.circular(5.0),
+                          bottomLeft: Radius.circular(5.0),
+                          bottomRight: Radius.circular(10.0),
+                        ),
+                        color: blue
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    child: Image.asset('assets/shifts-icon.png',height: 25,width: 25,color: yellow,),
+                  ),
+                  title: Text('Shift',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context)=> const Missions()  )
+                    );
+                  },
+                ):Container(),
+                ListTile(
+            leading: Container(
+              decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(15.0),
+                    topRight: Radius.circular(5.0),
+                    bottomLeft: Radius.circular(5.0),
+                    bottomRight: Radius.circular(10.0),
+                  ),
+                  color: red
+              ),
+              padding: EdgeInsets.all(8.0),
+              child: Image.asset('assets/logout-icon.png',height: 25,width: 25,color: white,),
+            ),
             title: Text('Logout', style: TextStyle(color: red, fontWeight: FontWeight.bold)),
             onTap: () {
               logOutFunction();
@@ -136,12 +230,14 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(width: 20),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.of(context).pop();
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => LoginScreen()),
                           (Route<dynamic> route) => false,
                     );
+                    clearUserSession();
+                    await signOut();
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(blue),
@@ -156,5 +252,21 @@ class _HomePageState extends State<HomePage> {
         );
       },
     );
+  }
+  Future<void> clearUserSession() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.remove('isLoggedIn');
+    // Clear other user-related information if needed
+  }
+  Future<void> signOut() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+
+    try {
+      await auth.signOut();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isLoggedIn', false);
+    } catch (e) {
+      print("Error signing out: $e");
+    }
   }
 }
