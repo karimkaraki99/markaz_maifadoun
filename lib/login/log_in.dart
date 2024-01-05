@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/mainscreens/home.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
 import '../database/users.dart';
-import '../database/vehicle.dart';
 import '../utils/image_utils.dart';
 import '../utils/reuseable_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -57,7 +56,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<bool> checkUserExists(String phoneNumber) async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
-    String docId;
     try {
       QuerySnapshot querySnapshot = await firestore.collection('users').get();
 

@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../database/users.dart';
+import '../teamLeader/shifts.dart';
 import 'checkup.dart';
 import 'library.dart';
 import 'members.dart';
@@ -41,7 +42,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   final List<Widget> _pages = [
-    activeMembers(),
+    ActiveMembersScreen(),
     CheckUp(),
     statusScreen(),
     libraryScreen(),
@@ -109,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                   leading: Container(
                     decoration: BoxDecoration(
                         shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(15.0),
                           topRight: Radius.circular(5.0),
                           bottomLeft: Radius.circular(5.0),
@@ -128,11 +129,11 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ),
-                role==0? ListTile(
+                role==1 || role ==2? ListTile(
                   leading: Container(
                     decoration: BoxDecoration(
                         shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(15.0),
                           topRight: Radius.circular(5.0),
                           bottomLeft: Radius.circular(5.0),
@@ -150,11 +151,11 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 ):Container(),
-                role>0? ListTile(
+                role==1 || role ==2? ListTile(
                   leading: Container(
                     decoration: BoxDecoration(
                         shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(15.0),
                           topRight: Radius.circular(5.0),
                           bottomLeft: Radius.circular(5.0),
@@ -168,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                   title: Text('Shift',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
                   onTap: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context)=> const Missions()  )
+                        MaterialPageRoute(builder: (context)=>  MissionListPage()  )
                     );
                   },
                 ):Container(),
@@ -176,7 +177,7 @@ class _HomePageState extends State<HomePage> {
             leading: Container(
               decoration: BoxDecoration(
                   shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(15.0),
                     topRight: Radius.circular(5.0),
                     bottomLeft: Radius.circular(5.0),

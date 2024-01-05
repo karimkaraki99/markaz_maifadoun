@@ -31,7 +31,6 @@ class _EditProfileState extends State<EditProfile> {
             'fname': _firstNameController.text,
             'lname': _lastNameController.text,
           });
-          print('User data updated successfully');
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -58,7 +57,6 @@ class _EditProfileState extends State<EditProfile> {
           );
         }
       } catch (e) {
-        print('Error updating user data: $e');
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -231,7 +229,7 @@ class _EditProfileState extends State<EditProfile> {
                               )
                           ),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               CustomButton(text: 'Back', color: blue, toDo: () {
                                 Navigator.of(context).pop(); // Close the dialog

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
 
 import '../database/vehicle.dart';
-import '../utils/vehicle_checkup.dart';
 
 class CheckUp extends StatefulWidget {
   const CheckUp({Key? key}) : super(key: key);
@@ -207,7 +206,6 @@ class _VehicleCheckupState extends State<VehicleCheckup> {
     Car5CheckUpForm(),
   ];
   int checkupIndex = 0;
-  bool _isPressed = false;
   @override
   Widget build(BuildContext context) {
     return Column(

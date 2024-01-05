@@ -3,6 +3,9 @@ import 'package:markaz_maifadoun/database/users.dart';
 import '../database/vehicle.dart';
 import '../utils/colors_util.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import '../utils/reuseable_widget.dart';
 
 
 class StartMission extends StatefulWidget {
@@ -12,17 +15,146 @@ class StartMission extends StatefulWidget {
   State<StartMission> createState() => _StartMissionState();
 }
 
+
 class _StartMissionState extends State<StartMission> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  GlobalKey<FormFieldState<Car?>> carKey = GlobalKey();
+  GlobalKey<FormFieldState<Users?>> teamLeaderKey = GlobalKey();
+  GlobalKey<FormFieldState<Users?>> driverKey = GlobalKey();
+  Car? selectedCar;
+  Users? selectedTeamLeader;
+  Users? selectedDriver;
+  Users? selectedMedic1;
+  Users? selectedMedic2;
+  Color colorCar = darkBlue;
+  Color colorDriver = darkBlue;
+  Color colorTeamLeader = darkBlue;
+  DateTime? selectedDateTime;
+  String? selectedDate;
+  String? selectedTime;
+  String? selectedMissionType;
+
+
+
+  formatDateTime(DateTime dateTime) {
+    selectedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+    selectedTime = DateFormat('HH:mm').format(dateTime);
+    print('selected date $selectedDate , time: $selectedTime');
+  }
+
+
   TextEditingController patientName = TextEditingController();
   TextEditingController location = TextEditingController();
   TextEditingController destination = TextEditingController();
   TextEditingController approvalId = TextEditingController();
 
+
+  Future<void> _createMission() async {
+    String? missionTypeValue = selectedMissionType;
+    String patientNameValue = patientName.text;
+    String locationValue = location.text;
+    String destinationValue = destination.text;
+    String approvalIdValue = approvalId.text;
+    String? dateValue = selectedDate;
+    String? timeValue = selectedTime;
+
+    String selectedCarName = selectedCar?.name ?? '';
+    String selectedTeamLeaderName =
+        '${selectedTeamLeader?.firstName ?? ''} ${selectedTeamLeader?.lastName ?? ''}';
+    String selectedDriverName =
+        '${selectedDriver?.firstName ?? ''} ${selectedDriver?.lastName ?? ''}';
+    String selectedMedic1Name =
+        '${selectedMedic1?.firstName ?? ''} ${selectedMedic1?.lastName ?? ''}';
+    String selectedMedic2Name =
+        '${selectedMedic2?.firstName ?? ''} ${selectedMedic2?.lastName ?? ''}';
+    bool isActive=true;
+    String? leaderPhoneNumber = selectedTeamLeader?.phoneNumber;
+    String? driverPhoneNumber = selectedDriver?.phoneNumber;
+    String? medic1PhoneNumber = selectedMedic1?.phoneNumber;
+    String? medic2PhoneNumber = selectedMedic2?.phoneNumber;
+
+    Map<String, dynamic> missionData = {
+      'patientName': patientNameValue,
+      'location': locationValue,
+      'destination': destinationValue,
+      'approvalId': approvalIdValue,
+      'selectedCar': selectedCarName,
+      'selectedTeamLeader': selectedTeamLeaderName,
+      'selectedDriver': selectedDriverName,
+      'selectedMedic1': selectedMedic1Name,
+      'selectedMedic2': selectedMedic2Name,
+      'isActive': isActive,
+      'date': dateValue,
+      'time': timeValue,
+      'type': missionTypeValue,
+      'leaderPhone': leaderPhoneNumber,
+      'driverPhoneNumber': driverPhoneNumber,
+      'medic1PhoneNumber': medic1PhoneNumber,
+      'medic2PhoneNumber': medic2PhoneNumber,
+    };
+
+    await FirebaseFirestore.instance.collection('missions').add(missionData);
+
+    print('Mission created successfully');
+    try {
+      // Update onMission field for the selected car
+      await FirebaseFirestore.instance
+          .collection('cars')
+          .where('name', isEqualTo: selectedCarName)
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        querySnapshot.docs.forEach((DocumentSnapshot doc) async {
+          String carId = doc.id;
+
+          await FirebaseFirestore.instance
+              .collection('cars')
+              .doc(carId)
+              .update({'onMission': true});
+        });
+      });
+
+      print('Car is on mission');
+
+      // Update onMission field for each selected user
+      final List<Users?> selectedUsers = [
+        selectedTeamLeader,
+        selectedDriver,
+        selectedMedic1,
+        selectedMedic2,
+      ];
+
+      for (Users? user in selectedUsers) {
+        if (user != null) {
+          try {
+            String userId = user.phoneNumber;
+
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .update({'onMission': true});
+
+            print('User $userId is on mission');
+          } catch (e) {
+            print('Error updating user fields: $e');
+            // Handle error as needed
+          }
+        }
+      }
+
+      print('Users are on mission');
+
+    } catch (e) {
+      print('Error updating fields: $e');
+      // Handle error as needed
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Start a Mision',style: TextStyle(color: white),),
+        title: Text('Start a Mission',style: TextStyle(color: white),),
         centerTitle: true,
         backgroundColor: blue,
         iconTheme: IconThemeData(
@@ -34,12 +166,84 @@ class _StartMissionState extends State<StartMission> {
           padding: EdgeInsets.all(16.0),
           child: Column(
             children: [
-              CarDropDown(),
-              TeamLeaderDropDown(),
-              DriverDropDown(),
-              TeamMembersDropDown(),
-              TeamMembersDropDown(),
-              SizedBox(height: 10,),
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    CarDropDown(
+                      key: carKey,
+                      color: colorCar,
+                      onCarSelected: (car) {
+                        setState(() {
+                          selectedCar = car;
+                        });
+                      },
+                    ),
+                    TeamLeaderDropDown(
+                      key: teamLeaderKey,
+                      onTeamLeaderSelected: (teamLeader) {
+                        setState(() {
+                          selectedTeamLeader = teamLeader;
+                        });
+                      },
+                    ),
+                    DriverDropDown(
+                      key: driverKey,
+                      color: colorTeamLeader,
+                      driverSelected: (driver) {
+                        setState(() {
+                          selectedDriver = driver;
+                        });
+                      },
+                    ),
+                    TeamMembersDropDown(
+                      memberSelected: (medic1) {
+                        setState(() {
+                          selectedMedic1 = medic1;
+                        });
+                      },
+                    ),
+                    TeamMembersDropDown(
+                      memberSelected: (medic2) {
+                        setState(() {
+                          selectedMedic2 = medic2;
+                        });
+                      },
+                    ),
+                    CustomButton(
+                      text: 'Submit',
+                      color: blue,
+                      toDo: () async {
+                        if (_formKey.currentState!.validate() &&
+                            selectedCar != null &&
+                            selectedTeamLeader != null &&
+                            selectedDriver != null) {
+                          await formatDateTime(selectedDateTime!);
+                          _createMission();
+
+                        } else {
+                          if (selectedCar == null) {
+                            setState(() {
+                              carKey.currentState?.validate();
+                              colorCar = red;
+                            });
+                          }
+                          if (selectedTeamLeader == null) {
+                            setState(() {
+                              teamLeaderKey.currentState?.validate();
+                              colorTeamLeader = red;
+                            });
+                          }
+                          if (selectedDriver == null) {
+                            driverKey.currentState?.validate();
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20,),
               Container(
                 decoration: BoxDecoration(
                   color: blue
@@ -49,13 +253,20 @@ class _StartMissionState extends State<StartMission> {
               ),
               SizedBox(height: 10,),
               MissionTypeDropdown(
-                onChanged: (selectedMissionType) {
+                initialValue: selectedMissionType,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedMissionType = newValue;
+                  });
                 },
               ),
-              DatePickerTextField(
-                initialDate: DateTime.now(),
-                onDateChanged: (selectedDate) {
-                  print("Selected Date: $selectedDate");
+              DateTimePickerTextField(
+                initialDateTime: selectedDateTime,
+                onDateTimeChanged: (dateTime) {
+                  setState(() {
+                    selectedDateTime=dateTime;
+                    formatDateTime(dateTime);
+                  });
                 },
               ),
               SizedBox(height: 20,),
@@ -98,7 +309,7 @@ class MissionTypeDropdown extends StatefulWidget {
   }) : super(key: key);
 
   final String? initialValue;
-  final Function(String?) onChanged;
+  final Function(String) onChanged;
 
   @override
   State<MissionTypeDropdown> createState() => _MissionTypeDropdownState();
@@ -129,7 +340,7 @@ class _MissionTypeDropdownState extends State<MissionTypeDropdown> {
       onChanged: (String? newValue) {
         setState(() {
           selectedMissionType = newValue;
-          widget.onChanged(newValue);
+          widget.onChanged(selectedMissionType ?? '');
         });
       },
       items: missionTypes.map<DropdownMenuItem<String>>((String value) {
@@ -141,8 +352,11 @@ class _MissionTypeDropdownState extends State<MissionTypeDropdown> {
     );
   }
 }
+
 class CarDropDown extends StatefulWidget {
-  const CarDropDown({Key? key}) : super(key: key);
+  final ValueChanged<Car?> onCarSelected;
+  final Color color;
+   CarDropDown({Key? key,required this.onCarSelected,required this.color, String? initialValue}) : super(key: key);
 
   @override
   _CarDropDownState createState() => _CarDropDownState();
@@ -163,7 +377,7 @@ class _CarDropDownState extends State<CarDropDown> {
     try {
       await Car.initCarsLists();
       setState(() {
-        cars = Car.allCarsList;
+        cars = Car.activeCarsList;
         isLoading = false;
       });
     } catch (e) {
@@ -186,7 +400,7 @@ class _CarDropDownState extends State<CarDropDown> {
             icon: Image.asset(
               'assets/ambulance_icon.png',
               height: 25,
-              color: yellow,
+              color: widget.color,
             ),
             iconSize: 24,
             elevation: 16,
@@ -194,11 +408,12 @@ class _CarDropDownState extends State<CarDropDown> {
             underline: Container(
               height: 2,
               width: 100,
-              color: Colors.grey,
+              color: widget.color,
             ),
             onChanged: (Car? newValue) {
               setState(() {
                 selectedValue = newValue!;
+                widget.onCarSelected(newValue);
               });
             },
             hint: Text('Select a car  '),
@@ -208,6 +423,7 @@ class _CarDropDownState extends State<CarDropDown> {
                 child: Text(car.name),
               );
             }).toList(),
+
           ),
         ),
       ),
@@ -216,7 +432,9 @@ class _CarDropDownState extends State<CarDropDown> {
 }
 
 class DriverDropDown extends StatefulWidget {
-  const DriverDropDown({Key? key}) : super(key: key);
+  final ValueChanged<Users?> driverSelected;
+  final Color color;
+  DriverDropDown({Key? key,required this.driverSelected,required this.color, String? initialValue}) : super(key: key);
 
   @override
   State<DriverDropDown> createState() => _DriverDropDownState();
@@ -249,6 +467,8 @@ class _DriverDropDownState extends State<DriverDropDown> {
 
   @override
   Widget build(BuildContext context) {
+    Color borderColor = widget.color;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Center(
@@ -263,23 +483,31 @@ class _DriverDropDownState extends State<DriverDropDown> {
               suggestions: drivers,
               decoration: InputDecoration(
                 labelText: 'Select a Driver',
+                labelStyle: TextStyle(color: borderColor),
                 contentPadding:
                 EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(color: borderColor),
                 ),
               ),
               itemBuilder: (BuildContext context, Users suggestion) {
                 return ListTile(
-                  title: Text('${suggestion.firstName} ${suggestion.lastName}'),
+                  title: Text(
+                      '${suggestion.firstName} ${suggestion.lastName}'),
                 );
               },
               itemFilter: (Users suggestion, String query) {
-                return suggestion.firstName.toLowerCase().contains(query.toLowerCase()) ||
-                    suggestion.lastName.toLowerCase().contains(query.toLowerCase());
+                return suggestion.firstName
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                    suggestion.lastName
+                        .toLowerCase()
+                        .contains(query.toLowerCase());
               },
               itemSorter: (Users a, Users b) {
                 return a.firstName.compareTo(b.firstName);
@@ -287,7 +515,9 @@ class _DriverDropDownState extends State<DriverDropDown> {
               itemSubmitted: (Users value) {
                 setState(() {
                   selectedValue = value;
-                  controller.text = '${value.firstName} ${value.lastName}'; // Update text field with name
+                  controller.text =
+                  '${value.firstName} ${value.lastName}';
+                  widget.driverSelected(value);
                 });
               },
               textSubmitted: (String query) {
@@ -301,8 +531,10 @@ class _DriverDropDownState extends State<DriverDropDown> {
   }
 }
 
+
 class TeamMembersDropDown extends StatefulWidget {
-  const TeamMembersDropDown({Key? key}) : super(key: key);
+  final ValueChanged<Users?> memberSelected;
+   TeamMembersDropDown({Key? key,required this.memberSelected, String? initialValue}) : super(key: key);
 
   @override
   State<TeamMembersDropDown> createState() => _TeamMembersDropDownState();
@@ -372,6 +604,7 @@ class _TeamMembersDropDownState extends State<TeamMembersDropDown> {
               setState(() {
                 selectedValue = value;
                 controller.text = '${value.firstName} ${value.lastName}';
+                widget.memberSelected(value);
               });
             },
               textSubmitted: (String query) {
@@ -386,7 +619,8 @@ class _TeamMembersDropDownState extends State<TeamMembersDropDown> {
 }
 
 class TeamLeaderDropDown extends StatefulWidget {
-  const TeamLeaderDropDown({Key? key}) : super(key: key);
+  final ValueChanged<Users?> onTeamLeaderSelected;
+  TeamLeaderDropDown({Key? key,required this.onTeamLeaderSelected, String? initialValue}) : super(key: key);
 
   @override
   State<TeamLeaderDropDown> createState() => _TeamLeaderDropDownState();
@@ -457,7 +691,8 @@ class _TeamLeaderDropDownState extends State<TeamLeaderDropDown> {
               itemSubmitted: (Users value) {
                 setState(() {
                   selectedLeader = value;
-                  controller.text = '${value.firstName} ${value.lastName}'; // Update text field with name
+                  controller.text = '${value.firstName} ${value.lastName}';
+                  widget.onTeamLeaderSelected(value);
                 });
               },
               textSubmitted: (String query) {
@@ -472,80 +707,120 @@ class _TeamLeaderDropDownState extends State<TeamLeaderDropDown> {
 }
 
 
-class DatePickerTextField extends StatefulWidget {
-  const DatePickerTextField({
+class DateTimePickerTextField extends StatefulWidget {
+  const DateTimePickerTextField({
     Key? key,
-    this.initialDate,
-    required this.onDateChanged,
+    this.initialDateTime,
+    required this.onDateTimeChanged,
   }) : super(key: key);
 
-  final DateTime? initialDate;
-  final Function(DateTime) onDateChanged;
+  final DateTime? initialDateTime;
+  final Function(DateTime) onDateTimeChanged;
 
   @override
-  State<DatePickerTextField> createState() => _DatePickerTextFieldState();
+  State<DateTimePickerTextField> createState() => _DateTimePickerTextFieldState();
 }
 
-class
-
-_DatePickerTextFieldState
-
-    extends
-
-    State<DatePickerTextField> {
-  DateTime? selectedDate;
+class _DateTimePickerTextFieldState extends State<DateTimePickerTextField> {
+  DateTime? selectedDateTime;
 
   @override
-
-
   void initState() {
     super.initState();
-    selectedDate = widget.initialDate;
+    selectedDateTime = widget.initialDateTime;
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: TextEditingController(
-        text: selectedDate != null ? _formatDate(selectedDate!) : '',
-      ),
+    return GestureDetector(
       onTap: () async {
-        final DateTime? pickedDate = await showDatePicker(
+        final DateTime? pickedDateTime = await showDatePickerAndTimePicker(
           context: context,
-          initialDate: selectedDate ?? DateTime.now(),
-          firstDate: DateTime(2000),
-          lastDate: DateTime(2100),
+          initialDateTime: selectedDateTime ?? DateTime.now(),
         );
 
-        if (pickedDate != null && pickedDate != selectedDate) {
+        if (pickedDateTime != null && pickedDateTime != selectedDateTime) {
           setState(() {
-            selectedDate = pickedDate;
-            widget.onDateChanged(pickedDate);
+            selectedDateTime = pickedDateTime;
+            widget.onDateTimeChanged(pickedDateTime);
           });
         }
       },
-      decoration: InputDecoration(
-        labelText: 'Choose Date',
-        suffixIcon: Icon(Icons.calendar_today),
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Colors.grey),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15.0),
+          child: Row(
+            children: [
+              Icon(Icons.calendar_today),
+              SizedBox(width: 10),
+              Text(
+                selectedDateTime != null
+                    ? _formatDateTime(selectedDateTime!)
+                    : 'Choose Date and Time',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  String _formatDateTime(DateTime dateTime) {
+    return DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
+  }
+
+  Future<DateTime?> showDatePickerAndTimePicker({
+    required BuildContext context,
+    DateTime? initialDateTime,
+  }) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDateTime ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDateTime ?? DateTime.now()),
+      );
+
+      if (pickedTime != null) {
+        pickedDate = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+      }
+    }
+
+    return pickedDate;
   }
 }
+
+
+
 class LabeledTextField extends StatelessWidget {
   final String labelText;
   final String hintText;
   final Color cursorColor;
   final TextEditingController controller;
+  final String? Function(String?)? validator;
 
   const LabeledTextField({
     required this.labelText,
     required this.hintText,
     required this.cursorColor,
     required this.controller,
+    this.validator,
   });
 
   @override
@@ -575,17 +850,13 @@ class LabeledTextField extends StatelessWidget {
                 borderSide: BorderSide(color: blue),
               ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter $labelText';
-              }
-              return null;
-            },
+            validator: validator,
           ),
         ),
       ),
     );
   }
 }
+
 
 

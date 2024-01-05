@@ -13,6 +13,7 @@ class Users {
   final int duty;
   final int duty2;
   final String year;
+  final bool onMission;
 
   final String userRole;
   final String userRank;
@@ -30,6 +31,7 @@ class Users {
     required this.duty,
     required this.duty2,
     required this.year,
+    required this.onMission
   })   : userRole = _calculateUserRole(role,rank),
         userRank = _calculateUserRank(rank),
         dutyDay = _calculateUserDutyDay(duty),
@@ -50,7 +52,6 @@ class Users {
       _loggedInUser = allUsersList.firstWhere(
             (user) => user.phoneNumber == loggedInPhoneNumber,
       );
-      print('loggedin user $_loggedInUser');
     }
   }
 
@@ -117,17 +118,22 @@ class Users {
   static List<Users> allDriversList = [];
   static List<Users> allTeamLeadersList = [];
   static List<Users> allOnlyMembers=[];
+  static List<Users> onMissionMembers=[];
+  static List<Users> availableMembers=[];
 
   static Future<bool> initUsersLists() async {
     bool isLoading = true;
     allUsersList = await getUsers();
     activeUsersList = allUsersList.where((user) => user.isActive).toList();
+    availableMembers = activeUsersList.where((user) => !user.onMission).toList();
+    onMissionMembers = allUsersList.where((user) => user.onMission).toList();
     activeDriverUsersList = activeUsersList.where((user) => user.isDriver).toList();
     activeTeamMemberUsersList = activeUsersList.where((user) => user.role==1 || user.role==2).toList();
     allDriversList = allUsersList.where((user) => user.isDriver).toList();
     allTeamLeadersList = allUsersList.where((user) => user.role==1 || user.role==2).toList();
     allOnlyMembers = allUsersList.where((user) => user.role==0).toList();
-    return isLoading=false;
+    isLoading =false;
+    return isLoading;
   }
 
   static Future<List<Users>> getUsers() async {
@@ -154,13 +160,14 @@ class Users {
           duty: userData['duty'] ?? 0,
           duty2: userData['duty2'] ?? 0,
           year: userData['since'] ?? '',
+          onMission: userData['onMission']?? false
         );
 
         userList.add(user);
         allUsersList.add(user);
       }
     } catch (e) {
-      print("Error fetching users: $e");
+      print(e);
     }
 
     return userList;
@@ -189,6 +196,21 @@ class Users {
     } catch (e) {
       print("Error updating isActive status: $e");
     }
+  }
+  factory Users.fromMap(Map<String, dynamic> map) {
+    return Users(
+        firstName: map['fname'] ?? '',
+        lastName: map['lname'] ?? '',
+        isDriver: map['isDriver'] ?? false,
+        isActive: map['isActive'] ?? false,
+        role: map['role'] ?? 0,
+        rank: map['rank'] ?? 0,
+        phoneNumber: map['phoneNumber'] ?? 0,
+        duty: map['duty'] ?? 0,
+        duty2: map['duty2'] ?? 0,
+        year: map['since'] ?? '',
+        onMission: map['onMission']?? false
+    );
   }
 
 }
