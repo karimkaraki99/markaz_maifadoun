@@ -120,6 +120,9 @@ class Users {
   static List<Users> allOnlyMembers=[];
   static List<Users> onMissionMembers=[];
   static List<Users> availableMembers=[];
+  static List<Users> availableAllMembers=[];
+  static List<Users> availableTeamLeaders=[];
+  static List<Users> availableDrivers=[];
 
   static Future<bool> initUsersLists() async {
     bool isLoading = true;
@@ -132,8 +135,17 @@ class Users {
     allDriversList = allUsersList.where((user) => user.isDriver).toList();
     allTeamLeadersList = allUsersList.where((user) => user.role==1 || user.role==2).toList();
     allOnlyMembers = allUsersList.where((user) => user.role==0).toList();
+    availableAllMembers =  allUsersList.where((user) => !user.onMission).toList();
+    availableTeamLeaders =  allTeamLeadersList.where((user) => !user.onMission).toList();
+    availableDrivers = allDriversList..where((user) => !user.onMission).toList();
     isLoading =false;
     return isLoading;
+  }
+  static Future<void> memberPage() async {
+    allUsersList = await getUsers();
+    activeUsersList = allUsersList.where((user) => user.isActive).toList();
+    availableMembers = activeUsersList.where((user) => !user.onMission).toList();
+    onMissionMembers = allUsersList.where((user) => user.onMission).toList();
   }
 
   static Future<List<Users>> getUsers() async {
@@ -173,9 +185,10 @@ class Users {
     return userList;
   }
 
-  static Future<List<Users>> getActiveUsers() async {
-    await initUsersLists();
-    return activeUsersList;
+  static Future<void> getActiveUsers() async {
+    allUsersList = await getUsers();
+    activeUsersList = allUsersList.where((user) => user.isActive).toList();
+    availableMembers = activeUsersList.where((user) => !user.onMission).toList();
   }
   static Future<List<Users>> getActiveDriverUsers() async {
     await initUsersLists();

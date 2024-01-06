@@ -3,6 +3,7 @@ import '../database/users.dart';
 import '../database/vehicle.dart';
 import '../utils/colors_util.dart';
 import '../utils/reuseable_widget.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ActiveMembersScreen extends StatefulWidget {
   const ActiveMembersScreen({Key? key}) : super(key: key);
@@ -13,11 +14,19 @@ class ActiveMembersScreen extends StatefulWidget {
 
 class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
   final ScrollController _scrollController = ScrollController();
-
+  bool isLoading = true;
   @override
   void initState() {
-    Users.initUsersLists();
+    loading();
     super.initState();
+
+  }
+  Future<void> loading() async{
+    Users.initUsersLists();
+    await Future.delayed(Duration(milliseconds: 800));
+    setState(() {
+      isLoading = false;
+    });
     _scrollController.animateTo(
       0,
       duration: Duration(seconds: 1),
@@ -25,12 +34,17 @@ class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
     );
   }
 
-  bool isLoading = false;
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body:   isLoading
+          ? const SpinKitFadingCircle(
+        color: Colors.blue,
+        size: 50.0,
+      )
+          :Column(
         children: [
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.06,
@@ -147,6 +161,7 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
   final ScrollController _scrollController = ScrollController();
   List<Users> _activeUsers = [];
   late int activeNumber;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -155,14 +170,22 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
   }
 
   Future<void> loadActiveUsers() async {
-    setState(() {
+    setState(() async {
+      Users.initUsersLists();
       _activeUsers = Users.availableMembers;
+      isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return   isLoading
+        ? SpinKitFadingCircle(
+      color: Colors.blue,
+      size: 50.0,
+    )
+        :
+    ListView.builder(
         controller: _scrollController,
         itemCount: _activeUsers.length,
         scrollDirection: Axis.vertical,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:markaz_maifadoun/database/missions.dart';
 import '../mainscreens/library.dart';
 import 'colors_util.dart';
 
@@ -128,8 +129,8 @@ class TextBox extends StatelessWidget {
 
   final double width;
   final double height;
-  int value1,value2,value3;
-  String title1,title2,title3;
+  final int value1,value2,value3;
+  final String title1,title2,title3;
 
   @override
   Widget build(BuildContext context) {
@@ -176,7 +177,7 @@ class TextBox extends StatelessWidget {
 class CardWidget extends StatelessWidget {
   final String imagePath;
   final String text;
-  String pdfName;
+  final String pdfName;
 
   CardWidget({
     required this.imagePath,
@@ -395,7 +396,59 @@ class _CustomIconButtonState extends State<CustomIconButton> {
     );
   }
 }
+class MissionTypeDropdown extends StatefulWidget {
+  const MissionTypeDropdown({
+    Key? key,
+    this.initialValue,
+    required this.onChanged,
+  }) : super(key: key);
 
+  final String? initialValue;
+  final Function(String) onChanged;
+
+  @override
+  State<MissionTypeDropdown> createState() => _MissionTypeDropdownState();
+}
+
+class _MissionTypeDropdownState extends State<MissionTypeDropdown> {
+   List<String> missionTypes =[];
+
+  String? selectedMissionType;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMissionType = widget.initialValue;
+    missionTypes = Mission.missionTypes;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<String>(
+      value: selectedMissionType,
+      iconSize: 24,
+      elevation: 16,
+      style: const TextStyle(color: Colors.black),
+      underline: Container(
+        height: 2,
+        color: Colors.grey,
+      ),
+      hint: Text('Mission Type'),
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedMissionType = newValue;
+          widget.onChanged(selectedMissionType ?? '');
+        });
+      },
+      items: missionTypes.map<DropdownMenuItem<String>>((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+    );
+  }
+}
 
 
 

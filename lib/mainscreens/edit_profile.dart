@@ -5,7 +5,7 @@ import 'package:markaz_maifadoun/mainscreens/profile.dart';
 import '../utils/colors_util.dart';
 import '../utils/reuseable_widget.dart';
 class EditProfile extends StatefulWidget {
-  String phoneNumber;
+  final String phoneNumber;
   EditProfile({super.key,required this.phoneNumber});
 
   @override
@@ -22,8 +22,7 @@ class _EditProfileState extends State<EditProfile> {
       try {
         String phoneNumber = widget.phoneNumber;
 
-        if (phoneNumber != null) {
-          // Update user data in Firestore
+        if (phoneNumber != null ) {
           await FirebaseFirestore.instance
               .collection('users')
               .doc(phoneNumber)

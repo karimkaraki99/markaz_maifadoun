@@ -1,130 +1,105 @@
 import 'package:flutter/material.dart';
-import 'package:markaz_maifadoun/teamLeader/start_mission.dart';
-import 'package:markaz_maifadoun/utils/colors_util.dart';
+import '../utils/colors_util.dart';
+import '../database/users.dart';
 
-import '../database/missions.dart';
-
-class MissionListPage extends StatefulWidget {
+class Shifts extends StatefulWidget {
   @override
-  State<MissionListPage> createState() => _MissionListPageState();
+  _ShiftsState createState() => _ShiftsState();
 }
 
-class _MissionListPageState extends State<MissionListPage> {
-  bool active = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Mission List'),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.07,
-                decoration: BoxDecoration(
-                  color: darkBlue,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(width: MediaQuery.of(context).size.width*0.02,),
-                    Expanded(child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          active = true;
-                        });
-                      },
-                      child: Expanded(child: Text("Active Missions", style: TextStyle(color: white,fontSize: 12)),),
-                      style: ButtonStyle(
-                          backgroundColor: !active?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)
-                              )
-                          )
-                      ),
-                    ),),
-                    Expanded(child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          active = false;
-                        });
-                      },
-                      child: Expanded(child: Text("History", style: TextStyle(color: white)),),
-                      style: ButtonStyle(
-                          backgroundColor: active?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
-                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)
-                              )
-                          )
-                      ),
-                    ),),
-                    SizedBox(width: MediaQuery.of(context).size.width*0.02,),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(width: MediaQuery.of(context).size.width*0.02,),
-            MissionList(),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => StartMission()),
-          );
-        },
-        child: Icon(Icons.add),
-        backgroundColor: blue,
-      ),
-    );
-  }
-}
-
-class MissionList extends StatefulWidget {
-  @override
-  State<MissionList> createState() => _MissionListState();
-}
-
-class _MissionListState extends State<MissionList> {
-  List<Mission> _missions = [];
+class _ShiftsState extends State<Shifts> {
+  String selectedDutyDay = 'Monday';
+  String? userDutyDay;
+  String? userDutyDay2;
+  int? userDuty;
 
   @override
   void initState() {
+    initializeData();
     super.initState();
-    loadMissions();
   }
 
-  Future<void> loadMissions() async {
-    // Assuming Mission.getMissions() fetches the mission data
-    _missions = await Mission.getMissions();
-    setState(() {}); // Refresh the UI after loading missions
+  Future<void> initializeData() async {
+    try {
+      await Users.initUsersLists();
+      await Users.initializeLoggedInUser();
+      setState(() {
+        userDutyDay = Users.loggedInUser?.dutyDay;
+        userDutyDay2 = Users.loggedInUser?.dutyDay2;
+        userDuty = Users.loggedInUser?.duty;
+        selectedDutyDay = userDutyDay ?? '';
+      });
+    } catch (e) {
+      print("Error initializing data: $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: _missions.length,
+    List<String> dropdownItems = [];
+    if (userDutyDay != null && userDutyDay!.isNotEmpty) {
+      dropdownItems.add(userDutyDay!);
+    }
+    if (userDutyDay2 != null && userDutyDay2!.isNotEmpty) {
+      dropdownItems.add(userDutyDay2!);
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Shifts $userDutyDay $userDuty $userDutyDay2'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            DropdownButton<String>(
+              value: selectedDutyDay,
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    selectedDutyDay = newValue;
+                  });
+                }
+              },
+              items: dropdownItems.map((String day) {
+                return DropdownMenuItem<String>(
+                  value: day,
+                  child: Text(day),
+                );
+              }).toList(),
+            ),
+
+            SizedBox(height: 20),
+            // List of users with the selected duty day
+            Expanded(
+              child: buildUserList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildUserList() {
+    List<Users> usersWithSelectedDutyDay = Users.allUsersList
+        .where((user) => user.dutyDay == selectedDutyDay)
+        .toList();
+
+    return usersWithSelectedDutyDay.isNotEmpty
+        ? ListView.builder(
+      itemCount: usersWithSelectedDutyDay.length,
       itemBuilder: (context, index) {
-        Mission mission = _missions[index];
+        Users user = usersWithSelectedDutyDay[index];
         return ListTile(
-          title: Text(mission.missionType),
-          subtitle: Text(mission.patientName),
-          onTap: () {
-            // Handle tapping on a mission, if needed
-          },
+          title: Text(user.firstName),
+          subtitle: Text(user.dutyDay),
+          // You can customize the list tile based on your needs
         );
       },
+    )
+        : Center(
+      child: Text('No users found for the selected duty day.'),
     );
   }
 }

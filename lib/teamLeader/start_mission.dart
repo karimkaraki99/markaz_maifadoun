@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/database/users.dart';
+import '../database/missions.dart';
 import '../database/vehicle.dart';
 import '../utils/colors_util.dart';
 import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../utils/reuseable_widget.dart';
+import 'missions.dart';
 
 
 class StartMission extends StatefulWidget {
@@ -142,11 +144,61 @@ class _StartMissionState extends State<StartMission> {
       }
 
       print('Users are on mission');
+      showSuccessDialogMessage();
 
     } catch (e) {
       print('Error updating fields: $e');
-      // Handle error as needed
+      
     }
+  }
+  void showSuccessDialogMessage( ){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: green,
+          title: Icon(Icons.check_circle ,size: 80, color: white,),
+          content: Text('Mission created successfully!',style: TextStyle(color: white),textAlign: TextAlign.center,),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => Missions()),
+                );// Close the dialog
+              },
+              child: Text('OK',style: TextStyle(color: white),),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void showErrorDialogMessage(String e ){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: red,
+          title: Icon(Icons.check_circle ,size: 80, color: white,),
+          content: Text('Error Creating Missions: $e',style: TextStyle(color: white),textAlign: TextAlign.center,),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                Navigator.pop(context);// Close the dialog
+              },
+              child: Text('OK',style: TextStyle(color: white),),
+            ),
+          ],
+        );
+      },
+    );
   }
 
 
@@ -170,6 +222,15 @@ class _StartMissionState extends State<StartMission> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    DateTimePickerTextField(
+                      initialDateTime: selectedDateTime,
+                      onDateTimeChanged: (dateTime) {
+                        setState(() {
+                          selectedDateTime=dateTime;
+                          formatDateTime(dateTime);
+                        });
+                      },
+                    ),
                     CarDropDown(
                       key: carKey,
                       color: colorCar,
@@ -210,6 +271,8 @@ class _StartMissionState extends State<StartMission> {
                         });
                       },
                     ),
+
+                    SizedBox(height: 20,),
                     CustomButton(
                       text: 'Submit',
                       color: blue,
@@ -260,15 +323,6 @@ class _StartMissionState extends State<StartMission> {
                   });
                 },
               ),
-              DateTimePickerTextField(
-                initialDateTime: selectedDateTime,
-                onDateTimeChanged: (dateTime) {
-                  setState(() {
-                    selectedDateTime=dateTime;
-                    formatDateTime(dateTime);
-                  });
-                },
-              ),
               SizedBox(height: 20,),
               LabeledTextField(
                 labelText: 'Patient Name',
@@ -316,13 +370,14 @@ class MissionTypeDropdown extends StatefulWidget {
 }
 
 class _MissionTypeDropdownState extends State<MissionTypeDropdown> {
-  final List<String> missionTypes = ['Rescue', 'Medical', 'Transport', 'Other'];
-  String? selectedMissionType;
+  late  List<String> missionTypes = [];
+  late String selectedMissionType;
 
   @override
   void initState() {
     super.initState();
-    selectedMissionType = widget.initialValue;
+    selectedMissionType = widget.initialValue!;
+    missionTypes = Mission.missionTypes;
   }
 
   @override
@@ -339,7 +394,7 @@ class _MissionTypeDropdownState extends State<MissionTypeDropdown> {
       hint: Text('Mission Type'),
       onChanged: (String? newValue) {
         setState(() {
-          selectedMissionType = newValue;
+          selectedMissionType = newValue ?? 'Emergency';
           widget.onChanged(selectedMissionType ?? '');
         });
       },
@@ -457,7 +512,7 @@ class _DriverDropDownState extends State<DriverDropDown> {
     try {
       await Users.initUsersLists();
       setState(() {
-        drivers = Users.allDriversList;
+        drivers = Users.availableDrivers;
         isLoading = false;
       });
     } catch (e) {
@@ -556,7 +611,7 @@ class _TeamMembersDropDownState extends State<TeamMembersDropDown> {
     try {
       await Users.initUsersLists();
       setState(() {
-        members = Users.allUsersList;
+        members = Users.availableAllMembers;
         isLoading = false;
       });
     } catch (e) {
@@ -643,7 +698,7 @@ class _TeamLeaderDropDownState extends State<TeamLeaderDropDown> {
     try {
       await Users.initUsersLists();
       setState(() {
-        teamLeaders = Users.allTeamLeadersList;
+        teamLeaders = Users.availableTeamLeaders;
         isLoading = false;
       });
     } catch (e) {

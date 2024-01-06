@@ -44,6 +44,8 @@ class Mission{
   static List<Mission> allMissionsList = [];
   static List<Mission> activeMissionsList = [];
   static List<Mission> historyMissionsList = [];
+  static List<String> missionTypes = ['Emergency','Transport','Medical', 'Funeral','Accident','Rescue','No Transport'];
+
 
   static Future<bool> initMissionsLists() async {
     bool isLoading = true;

@@ -146,7 +146,7 @@ class _ProfileState extends State<Profile> {
                               ),
                             ),
                           ),
-                          IconButton(onPressed: (){}, icon: Icon(Icons.camera_alt , size: 40,color: yellow,))
+
                         ],
                       ),
                   SizedBox(height: 20.0),
@@ -182,13 +182,13 @@ class _ProfileState extends State<Profile> {
   }
 }
 class ViewProfile extends StatefulWidget {
-  String rank;
-  String role ;
-  String phoneNumber;
-  String dutyDay;
-  String dutyDay2;
-  bool isDriver;
-  String year;
+  final String rank;
+  final String role ;
+  final String phoneNumber;
+  final String dutyDay;
+  final String dutyDay2;
+  final bool isDriver;
+  final String year;
    ViewProfile({super.key , required this.rank, required this.role,required this.phoneNumber,required this.dutyDay,required this.dutyDay2,required this.isDriver,required this.year});
 
   @override

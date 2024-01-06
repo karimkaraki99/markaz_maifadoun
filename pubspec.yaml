@@ -80,6 +80,9 @@ flutter:
     - assets/mission-icon.png
     - assets/logout-icon.png
     - assets/shifts-icon.png
+    - assets/addmember-icon.png
+    - assets/members-icon.png
+    - assets/car-icon.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

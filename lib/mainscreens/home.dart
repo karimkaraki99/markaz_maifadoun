@@ -8,6 +8,7 @@ import 'package:markaz_maifadoun/utils/colors_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../admin/add_member.dart';
 import '../database/users.dart';
 import '../teamLeader/shifts.dart';
 import 'checkup.dart';
@@ -169,7 +170,29 @@ class _HomePageState extends State<HomePage> {
                   title: Text('Shift',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
                   onTap: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context)=>  MissionListPage()  )
+                        MaterialPageRoute(builder: (context)=>  Shifts()  )
+                    );
+                  },
+                ):Container(),
+                role ==2? ListTile(
+                  leading: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(15.0),
+                          topRight: Radius.circular(5.0),
+                          bottomLeft: Radius.circular(5.0),
+                          bottomRight: Radius.circular(10.0),
+                        ),
+                        color: blue
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    child: Image.asset('assets/addmember-icon.png',height: 25,width: 25,color: yellow,),
+                  ),
+                  title: Text('Add Member',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context)=>  AddUserPage()  )
                     );
                   },
                 ):Container(),
