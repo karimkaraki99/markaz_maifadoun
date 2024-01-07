@@ -124,8 +124,7 @@ class Users {
   static List<Users> availableTeamLeaders=[];
   static List<Users> availableDrivers=[];
 
-  static Future<bool> initUsersLists() async {
-    bool isLoading = true;
+  static Future<void> initUsersLists() async {
     allUsersList = await getUsers();
     activeUsersList = allUsersList.where((user) => user.isActive).toList();
     availableMembers = activeUsersList.where((user) => !user.onMission).toList();
@@ -138,8 +137,6 @@ class Users {
     availableAllMembers =  allUsersList.where((user) => !user.onMission).toList();
     availableTeamLeaders =  allTeamLeadersList.where((user) => !user.onMission).toList();
     availableDrivers = allDriversList..where((user) => !user.onMission).toList();
-    isLoading =false;
-    return isLoading;
   }
   static Future<void> memberPage() async {
     allUsersList = await getUsers();

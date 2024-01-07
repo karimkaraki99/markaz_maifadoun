@@ -13,7 +13,6 @@ class ActiveMembersScreen extends StatefulWidget {
 }
 
 class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
-  final ScrollController _scrollController = ScrollController();
   bool isLoading = true;
   @override
   void initState() {
@@ -22,16 +21,11 @@ class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
 
   }
   Future<void> loading() async{
-    Users.initUsersLists();
-    await Future.delayed(Duration(milliseconds: 800));
-    setState(() {
-      isLoading = false;
+    await Users.initUsersLists().then((value){
+      setState(() {
+        isLoading = false;
+      });
     });
-    _scrollController.animateTo(
-      0,
-      duration: Duration(seconds: 1),
-      curve: Curves.easeInOut,
-    );
   }
 
 
@@ -58,7 +52,7 @@ class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
             height: MediaQuery.of(context).size.height * 0.02,
           ),
           isLoading
-              ? CircularProgressIndicator()
+              ? const CircularProgressIndicator()
               : TextBox(
             title1: 'Team Leader',
             value1: Users.activeTeamMemberUsersList.length,
@@ -74,13 +68,13 @@ class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
           ),
           // Active members widget
           Container(
-            decoration: BoxDecoration(),
+            decoration: const BoxDecoration(),
             child: Column(
               children: [
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
+                      padding: const EdgeInsets.only(left: 16.0),
                     child: Text(
                       "Active Members",
                       style: TextStyle(
@@ -94,7 +88,7 @@ class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
                 Container(
                   height: MediaQuery.of(context).size.height * 0.27,
                   alignment: Alignment.topCenter,
-                  child: ActiveMembersList(),
+                  child: const ActiveMembersList(),
                 )
               ],
             ),
@@ -138,7 +132,7 @@ class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
                 IntrinsicHeight(
                   child: Container(
                     height: MediaQuery.of(context).size.height * 0.27,
-                    child: OnMissionMembersList(),
+                    child: const OnMissionMembersList(),
                   ),
                 )
               ],
@@ -158,7 +152,6 @@ class ActiveMembersList extends StatefulWidget {
 }
 
 class _ActiveMembersListState extends State<ActiveMembersList> {
-  final ScrollController _scrollController = ScrollController();
   List<Users> _activeUsers = [];
   late int activeNumber;
   bool isLoading = true;
@@ -169,8 +162,8 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
     loadActiveUsers();
   }
 
-  Future<void> loadActiveUsers() async {
-    setState(() async {
+   loadActiveUsers() async {
+    setState((){
       Users.initUsersLists();
       _activeUsers = Users.availableMembers;
       isLoading = false;
@@ -179,15 +172,13 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
 
   @override
   Widget build(BuildContext context) {
-    return   isLoading
-        ? SpinKitFadingCircle(
+    return isLoading
+        ? const SpinKitFadingCircle(
       color: Colors.blue,
       size: 50.0,
-    )
-        :
-    ListView.builder(
-        controller: _scrollController,
-        itemCount: _activeUsers.length,
+    ) : ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: _activeUsers.length,
         scrollDirection: Axis.vertical,
         itemBuilder: (context, index) {
           Users user = _activeUsers[index];
@@ -200,14 +191,14 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
                     : Icons.person,
                 color: yellow),
             title: Text('${user.firstName} ${user.lastName}',
-                style: TextStyle(
+                style: const TextStyle(
                     color: Colors.black, fontWeight: FontWeight.bold)),
             subtitle: Text('Role: ${user.userRole}',
                 style: TextStyle(
                     color: darkGrey, fontWeight: FontWeight.w300)),
             trailing: IconButton(
               onPressed: () {},
-              icon: Icon(Icons.phone, color: Colors.green),
+              icon: const Icon(Icons.phone, color: Colors.green),
             ),
           );
         },
@@ -228,10 +219,10 @@ class _OnMissionMembersListState extends State<OnMissionMembersList> {
   @override
   void initState() {
     super.initState();
-    loadonMissionUsers();
+    loadingMissionUsers();
   }
 
-  Future<void> loadonMissionUsers() async {
+  Future<void> loadingMissionUsers() async {
     setState(() {
       _onMissionUsers = Users.onMissionMembers;
     });
@@ -242,6 +233,7 @@ class _OnMissionMembersListState extends State<OnMissionMembersList> {
     return Container(
       padding: EdgeInsets.zero, // Set padding to zero
       child: ListView.builder(
+        padding: EdgeInsets.zero,
         itemCount: _onMissionUsers.length,
         itemBuilder: (context, index) {
           Users user = _onMissionUsers[index];

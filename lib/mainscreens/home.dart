@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/login/log_in.dart';
@@ -7,14 +9,13 @@ import 'package:markaz_maifadoun/teamLeader/missions.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
 import '../admin/add_member.dart';
 import '../database/users.dart';
 import '../teamLeader/shifts.dart';
 import 'checkup.dart';
 import 'library.dart';
 import 'members.dart';
-
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -24,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   int  role = 0;
 
+
   Future<void> initializeData() async {
     try {
       await Users.initUsersLists();
@@ -32,6 +34,13 @@ class _HomePageState extends State<HomePage> {
         role = Users.loggedInUser?.role ?? 0;
         print('role is $role');
       });
+
+
+      if (role == 2 || role == 1){
+        FirebaseMessaging.instance.subscribeToTopic('admin');
+      }
+
+
     } catch (e) {
       print("Error initializing data: $e");
     }
@@ -262,6 +271,11 @@ class _HomePageState extends State<HomePage> {
                     );
                     clearUserSession();
                     await signOut();
+
+                    if (role == 2 || role == 1){
+                      FirebaseMessaging.instance.unsubscribeFromTopic('admin');
+                    }
+
                   },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all<Color>(blue),

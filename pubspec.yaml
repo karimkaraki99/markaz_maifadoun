@@ -53,6 +53,9 @@ dev_dependencies:
   shared_preferences: ^2.2.2
   autocomplete_textfield: ^2.0.0
   intl: ^0.18.0
+  firebase_messaging: ^14.7.10
+  permission_handler: ^11.1.0
+  http: ^1.1.2
 
 flutter:
 

@@ -75,15 +75,16 @@ class _CarsListScreenState extends State<CarsListScreen> {
 
   @override
   void initState() {
-    super.initState();
     fetchData();
+    super.initState();
   }
 
   Future<void> fetchData() async {
-    Car.initCarsLists();
-    setState(() {
-      cars = Car.allCarsList;
-      isLoading = false;
+    await Car.initCarsLists().then((value) {
+      setState(() {
+        cars = Car.allCarsList;
+        isLoading = false;
+      });
     });
   }
 

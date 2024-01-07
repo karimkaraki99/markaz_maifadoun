@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/database/users.dart';
 import '../database/missions.dart';
@@ -8,6 +10,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../utils/reuseable_widget.dart';
 import 'missions.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
 
 
 class StartMission extends StatefulWidget {
@@ -34,14 +38,13 @@ class _StartMissionState extends State<StartMission> {
   DateTime? selectedDateTime;
   String? selectedDate;
   String? selectedTime;
-  String? selectedMissionType;
+  String? selectedMissionType = "Emergency";
 
 
 
   formatDateTime(DateTime dateTime) {
     selectedDate = DateFormat('yyyy-MM-dd').format(dateTime);
     selectedTime = DateFormat('HH:mm').format(dateTime);
-    print('selected date $selectedDate , time: $selectedTime');
   }
 
 
@@ -144,7 +147,14 @@ class _StartMissionState extends State<StartMission> {
       }
 
       print('Users are on mission');
+
+
+      sendNotificationToAllUsers();
+
       showSuccessDialogMessage();
+
+
+
 
     } catch (e) {
       print('Error updating fields: $e');
@@ -176,6 +186,30 @@ class _StartMissionState extends State<StartMission> {
         );
       },
     );
+  }
+  Future<void> sendNotificationToAllUsers() async {
+    try{
+      await http.post(
+          Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          headers:<String,String>{'Content-Type':'application/json',
+            'Authorization':'key=AAAALeyHDpI:APA91bEAkTrkng8nW3Kbu0wq68Kp23FP6e6yrod275qmIs73TAs2Hdt2u7qcRUw4yTgtFT6QatmEvb8hXOIT7JecTzJppOf1mvWVnzfjFtfxp4QuRRJdQtSddLqieLl9dr_n_yjDcEgo'},
+          body:jsonEncode({
+            'to': "/topics/admin",
+            'data': {
+              'via': 'FlutterFire Cloud Messaging!!!',
+              'count': '',
+            },
+            'notification': {
+              'title': 'New Mission!',
+              'body': '${selectedCar?.name} moved into a new mission, ${selectedDriver?.firstName} is the driver.',
+            },})).then((value){
+        print(value.reasonPhrase);
+      });
+
+      print('Success notification sent to all users');
+    } catch (e) {
+      print('Error sending success notification: $e');
+    }
   }
   void showErrorDialogMessage(String e ){
     showDialog(
@@ -215,7 +249,7 @@ class _StartMissionState extends State<StartMission> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
               Form(
@@ -376,7 +410,7 @@ class _MissionTypeDropdownState extends State<MissionTypeDropdown> {
   @override
   void initState() {
     super.initState();
-    selectedMissionType = widget.initialValue!;
+    selectedMissionType = widget.initialValue??"";
     missionTypes = Mission.missionTypes;
   }
 

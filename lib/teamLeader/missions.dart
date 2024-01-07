@@ -25,57 +25,56 @@ class _MissionsState extends State<Missions> {
       ),
       body: Column(
         children: [
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: MediaQuery.of(context).size.height * 0.07,
+          ListTile(
+            title: Container(
               decoration: BoxDecoration(
                 color: darkBlue,
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(10.0),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(width: MediaQuery.of(context).size.width*0.02,),
-                  Expanded(child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        active = true;
-                      });
-                    },
-                    child: Expanded(child: Text("Active Missions", style: TextStyle(color: white,fontSize: 12)),),
-                    style: ButtonStyle(
-                        backgroundColor: !active?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
+                children: <Widget>[
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          active = true;
+                        });
+                      },
+                      child: Text("Active Missions",style: TextStyle(color: white),),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(active?grey:darkBlue),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5)
-                            )
-                        )
+                          RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5.0)
+                          ),
+                        ),
+                      ),
                     ),
-                  ),),
-                  Expanded(child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        active = false;
-                      });
-                    },
-                    child: Expanded(child: Text("History", style: TextStyle(color: white)),),
-                    style: ButtonStyle(
-                        backgroundColor: active?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          active = false;
+                        });
+                      },
+                      child: Text("History",style: TextStyle(color: white),),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(!active?grey:darkBlue),
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5)
-                            )
-                        )
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),),
-                  SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+
+                  ),
                 ],
               ),
             ),
           ),
+
           SizedBox(height: MediaQuery.of(context).size.height*0.02,),
           active?Container(
             height: MediaQuery.of(context).size.height*0.7,
