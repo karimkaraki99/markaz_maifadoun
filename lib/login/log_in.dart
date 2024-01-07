@@ -29,6 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
     checkUserSignIn();
   }
 
+
   Future<void> checkUserSignIn() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -188,7 +189,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(width: 5),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+
+                      },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: yellow,
                       ),
@@ -213,65 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     : SubmitButton(
                     onpress: () async {
 
-                      setState(() {
-                        isLoading = true;
-                      });
-
-
-                          bool userExists =
-                          await checkUserExists(_phoneController.text);
-                          if (userExists) {
-                            if (enteredOTP!=null && verificationIdReceived != null && !isLogin){
-
-                              PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: verificationIdReceived!, smsCode: enteredOTP!);
-                              await auth.signInWithCredential(credential).then((value){
-                                setState(() {
-                                  isLoading = false;
-                                  isLogin = false;
-                                });
-
-                                Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(builder: (context)=> HomePage())
-                                );
-
-                              });
-                            }
-
-                            await auth.verifyPhoneNumber(
-                              phoneNumber: '+961${_phoneController.text}',
-                              codeSent: (String verificationId, int? resendToken) async {
-                                setState(() {
-                                  isLoading = false;
-                                  isLogin = false;
-                                });
-                                verificationIdReceived = verificationId;
-
-                                if (!mounted){
-                                  setState(() {
-                                    isLogin = false;
-                                  });
-                                }
-                              },
-                              verificationFailed: (FirebaseAuthException error) {},
-                              codeAutoRetrievalTimeout: (String verificationId) {  },
-                              verificationCompleted: (PhoneAuthCredential phoneAuthCredential) {  },
-                            );
-                          }else {
-                            setState(() {
-                              isLoading = false;
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Text("""You don't have authority"""),
-                                duration: Duration(seconds: 3),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            );
-                          }
+                      loginFunction();
 
 
                     },
@@ -316,4 +261,66 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+    loginFunction() async{
+      setState(() {
+        isLoading = true;
+      });
+
+
+      bool userExists =
+          await checkUserExists(_phoneController.text);
+      if (userExists) {
+        if (enteredOTP!=null && verificationIdReceived != null && !isLogin){
+
+          PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: verificationIdReceived!, smsCode: enteredOTP!);
+          await Future.delayed(Duration(seconds: 10));
+          await auth.signInWithCredential(credential).then((value){
+            setState(() {
+              isLoading = false;
+              isLogin = false;
+            });
+
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context)=> HomePage())
+            );
+
+          });
+        }
+
+        await auth.verifyPhoneNumber(
+          phoneNumber: '+961${_phoneController.text}',
+          codeSent: (String verificationId, int? resendToken) async {
+            setState(() {
+              isLoading = false;
+              isLogin = false;
+            });
+            verificationIdReceived = verificationId;
+
+            if (!mounted){
+              setState(() {
+                isLogin = false;
+              });
+            }
+          },
+          verificationFailed: (FirebaseAuthException error) {},
+          codeAutoRetrievalTimeout: (String verificationId) {  },
+          verificationCompleted: (PhoneAuthCredential phoneAuthCredential) {  },
+        );
+      }else {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text("""You don't have authority"""),
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    }
 }

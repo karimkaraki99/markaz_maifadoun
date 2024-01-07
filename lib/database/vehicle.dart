@@ -21,7 +21,7 @@ class Car {
   static List<Car> allCarsList = [];
   static List<Car> activeCarsList = [];
   static List<Car> activeNowCarsList = [];
-
+  static List<Car> availableNowCarsList = [];
   static Future<bool> initCarsLists() async {
     bool isLoading = true;
     allCarsList = await getCars();

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../utils/colors_util.dart';
-import '../utils/reuseable_widget.dart';
 
 class AddUserPage extends StatefulWidget {
   @override

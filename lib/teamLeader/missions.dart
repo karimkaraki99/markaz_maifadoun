@@ -4,10 +4,13 @@ import 'package:markaz_maifadoun/teamLeader/start_mission.dart';
 import '../database/missions.dart';
 import '../utils/colors_util.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
 
+import '../utils/reuseable_widget.dart';
 
 class Missions extends StatefulWidget {
   const Missions({super.key});
+
 
   @override
   State<Missions> createState() => _MissionsState();
@@ -15,6 +18,21 @@ class Missions extends StatefulWidget {
 
 class _MissionsState extends State<Missions> {
   bool active = true;
+  DateTime selectedDateTime = DateTime.now();
+  String? dateString ;
+  List<Mission> _historyMissions = [];
+
+  Future<void> loadMissionsByDate( ) async {
+    try {
+      await Mission.initMissionsLists();
+      setState(() {
+        _historyMissions = Mission.historyMissionsList.where((mission) => mission.date == dateString).toList();
+      });
+    } catch (e) {
+      print("Error loading missions: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,6 +40,19 @@ class _MissionsState extends State<Missions> {
         backgroundColor: Colors.transparent,
         title: Text('Missions'),
         centerTitle: true,
+        actions: [
+          !active?DateSelectionWidget(
+            initialDate: selectedDateTime,
+            onDateSelected: (DateTime pickedDate)  {
+              setState(() {
+                selectedDateTime = pickedDate;
+                dateString = DateFormat('yyyy-MM-dd').format(pickedDate);
+                loadMissionsByDate( );
+              });
+            },
+
+          ):Container()
+        ],
       ),
       body: Column(
         children: [
@@ -32,6 +63,7 @@ class _MissionsState extends State<Missions> {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   Expanded(
                     child: ElevatedButton(
@@ -83,7 +115,60 @@ class _MissionsState extends State<Missions> {
           ):Container(
             height: MediaQuery.of(context).size.height*0.7,
             width: MediaQuery.of(context).size.width*0.9,
-            child: HistoryMissions(),
+            child: ListView.builder(
+              itemCount: _historyMissions.length,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (context, index) {
+                if (_historyMissions.isEmpty) {
+                  return SizedBox.shrink();
+                }
+
+                Mission mission = _historyMissions[index];
+                return Column(
+                  children: [
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context)=>  EditMissionPage(mission: mission,)  )
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.only(
+                              topLeft: (index % 2 != 0) ? Radius.circular(5.0) : Radius.circular(15.0),
+                              topRight: (index % 2 != 0) ? Radius.circular(15.0) : Radius.circular(5.0),
+                              bottomLeft: (index % 2 != 0) ? Radius.circular(15.0) : Radius.circular(5.0),
+                              bottomRight: (index % 2 != 0) ? Radius.circular(5.0) : Radius.circular(15.0),
+                            ),
+                            color: index%2!=0?Colors.grey.shade200:Colors.grey.shade400
+                        ),
+                        child: ListTile(
+                          leading: Text(mission.car,style: TextStyle(
+                              color: darkBlue, fontWeight: FontWeight.bold,fontSize: 18),),
+                          title: Text(
+                            mission.patientName,
+                            style: TextStyle(
+                                color: darkBlue, fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            mission.missionType,
+                            style: TextStyle(
+                                color: darkGrey, fontWeight: FontWeight.w300),
+                          ),
+                          trailing: Text(
+                            mission.time,
+                            style: TextStyle(
+                                color: Colors.black, fontWeight: FontWeight.bold,fontSize: 18),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height*0.02,),
+                  ],
+                );
+              },
+            )
           ),
         ],
       ),
@@ -195,96 +280,6 @@ class _missionListRow extends State<missionListRow> {
 
 
 
-class HistoryMissions extends StatefulWidget {
-  const HistoryMissions({super.key});
 
-  @override
-  State<HistoryMissions> createState() => _HistoryMissionsState();
-}
-
-class _HistoryMissionsState extends State<HistoryMissions> {
-  List<Mission> _historyMissions = [];
-  bool isLoading = true;
-  @override
-
-  void initState() {
-    super.initState();
-    loadActiveMissions();
-  }
-
-  Future<void> loadActiveMissions() async {
-    try {
-      await Mission.initMissionsLists();
-      setState(() {
-        _historyMissions = Mission.historyMissionsList;
-        isLoading = false;
-      });
-    } catch (e) {
-      print("Error loading missions: $e");
-    }
-  }
-  @override
-  Widget build(BuildContext context) {
-    return isLoading
-        ? SpinKitFadingCircle(
-      color: Colors.blue,
-      size: 50.0,
-    )
-        : ListView.builder(
-      itemCount: _historyMissions.length,
-      scrollDirection: Axis.vertical,
-      itemBuilder: (context, index) {
-        if (_historyMissions.isEmpty) {
-          return SizedBox.shrink();
-        }
-
-        Mission mission = _historyMissions[index];
-        return Column(
-          children: [
-            GestureDetector(
-              onTap: (){
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context)=>  EditMissionPage(mission: mission,)  )
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.only(
-                      topLeft: (index % 2 != 0) ? Radius.circular(5.0) : Radius.circular(15.0),
-                      topRight: (index % 2 != 0) ? Radius.circular(15.0) : Radius.circular(5.0),
-                      bottomLeft: (index % 2 != 0) ? Radius.circular(15.0) : Radius.circular(5.0),
-                      bottomRight: (index % 2 != 0) ? Radius.circular(5.0) : Radius.circular(15.0),
-                    ),
-                    color: index%2!=0?Colors.grey.shade200:Colors.grey.shade400
-                ),
-                child: ListTile(
-                  leading: Text(mission.car,style: TextStyle(
-                      color: darkBlue, fontWeight: FontWeight.bold,fontSize: 18),),
-                  title: Text(
-                    mission.patientName,
-                    style: TextStyle(
-                        color: darkBlue, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    mission.missionType,
-                    style: TextStyle(
-                        color: darkGrey, fontWeight: FontWeight.w300),
-                  ),
-                  trailing: Text(
-                    mission.time,
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.bold,fontSize: 18),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: MediaQuery.of(context).size.height*0.02,),
-          ],
-        );
-      },
-    );
-  }
-}
 
 

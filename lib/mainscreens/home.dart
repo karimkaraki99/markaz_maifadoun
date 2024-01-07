@@ -251,36 +251,30 @@ class _HomePageState extends State<HomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.grey),
-                    fixedSize: MaterialStateProperty.all<Size>(Size(120.0, 30.0)),
-                  ),
                   child: Text('No', style: TextStyle(color: white)),
                 ),
                 const SizedBox(width: 20),
-                ElevatedButton(
+                TextButton(
                   onPressed: () async {
+                    await signOut();
+                    await clearUserSession();
                     Navigator.of(context).pop();
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (context) => LoginScreen()),
                           (Route<dynamic> route) => false,
                     );
-                    clearUserSession();
-                    await signOut();
+
+
 
                     if (role == 2 || role == 1){
                       FirebaseMessaging.instance.unsubscribeFromTopic('admin');
                     }
 
                   },
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(blue),
-                    fixedSize: MaterialStateProperty.all<Size>(Size(120.0, 30.0)),
-                  ),
                   child: Text('Yes', style: TextStyle(color: white)),
                 ),
               ],
@@ -294,7 +288,6 @@ class _HomePageState extends State<HomePage> {
   Future<void> clearUserSession() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('isLoggedIn');
-    // Clear other user-related information if needed
   }
   Future<void> signOut() async {
     FirebaseAuth auth = FirebaseAuth.instance;

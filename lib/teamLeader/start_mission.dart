@@ -10,7 +10,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../utils/reuseable_widget.dart';
 import 'missions.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 
 
@@ -466,7 +465,7 @@ class _CarDropDownState extends State<CarDropDown> {
     try {
       await Car.initCarsLists();
       setState(() {
-        cars = Car.activeCarsList;
+        cars = Car.activeNowCarsList;
         isLoading = false;
       });
     } catch (e) {

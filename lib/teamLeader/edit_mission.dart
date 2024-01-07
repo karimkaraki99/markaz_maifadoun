@@ -52,6 +52,7 @@ class _EditMissionPageState extends State<EditMissionPage> {
   String? medic2PhoneNumber;
   String selectedMissionType = 'Emergency';
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? loggedInUserPhoneNumber;
 
   @override
   void initState() {
@@ -65,6 +66,7 @@ class _EditMissionPageState extends State<EditMissionPage> {
     driverPhoneNumber = widget.mission.driverPhoneNumber;
     medic1PhoneNumber =  widget.mission.medic1PhoneNumber;
     medic2PhoneNumber = widget.mission.medic2PhoneNumber;
+    loggedInUserPhoneNumber = Users.loggedInUser?.phoneNumber;
     selectedMissionType = widget.mission.missionType?.isNotEmpty == true
         ? widget.mission.missionType!
         : 'Emergency';
@@ -83,7 +85,6 @@ class _EditMissionPageState extends State<EditMissionPage> {
         medic2PhoneNumber,
       ];
 
-      // Update onMission field for each selected user
       for (String? phoneNumber in selectedUsersPhoneNumbers) {
         if (phoneNumber != null) {
           try {
@@ -95,12 +96,10 @@ class _EditMissionPageState extends State<EditMissionPage> {
             print('User $phoneNumber is not on a mission anymore');
           } catch (e) {
             print('Error updating user fields: $e');
-            // Handle error as needed
           }
         }
       }
 
-      // Update onMission field for the car
       String? carName = selectedCar;
       if (carName != null && carName.isNotEmpty) {
         try {
@@ -112,17 +111,11 @@ class _EditMissionPageState extends State<EditMissionPage> {
           print('Car $carName is not on a mission anymore');
         } catch (e) {
           print('Error updating car fields: $e');
-          // Handle error as needed
         }
       } else {
         print('Invalid carName: $carName');
       }
-
-
-      // Update the isActive field to false in the mission document
       await missions.doc(widget.mission.id).update({'isActive': false});
-
-      // Optionally, you can setState to update the UI with the new mission data
       setState(() {
         widget.mission.isActive = false;
         showSuccessDoneMessage( );
@@ -131,7 +124,6 @@ class _EditMissionPageState extends State<EditMissionPage> {
       print('Marked mission as done successfully');
     } catch (e) {
       print('Error marking mission as done: $e');
-      // Handle the error
     }
   }
   Future<void> updateMissionInDatabase() async {
@@ -158,7 +150,6 @@ class _EditMissionPageState extends State<EditMissionPage> {
     } catch (e) {
       String error = 'Error Updating Mission $e';
       showErrorDialogMessage(error);
-      // Handle the error
     }
   }
   void showSuccessDialogMessage( ){
@@ -230,6 +221,17 @@ class _EditMissionPageState extends State<EditMissionPage> {
       },
     );
   }
+  Future<void> deleteAndMarkMissionAsDone() async {
+    await markMissionAsDoneInDatabase();
+    CollectionReference missions = FirebaseFirestore.instance.collection('missions');
+    try {
+      await missions.doc(widget.mission.id).delete();
+      print('Mission deleted successfully');
+    } catch (e) {
+      print('Error deleting mission: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +239,40 @@ class _EditMissionPageState extends State<EditMissionPage> {
       appBar: AppBar(
         title: Text('Edit Mission'),
         centerTitle: true,
+        actions: [
+           IconButton(
+            onPressed: loggedInUserPhoneNumber == leaderPhone?() {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    backgroundColor: white,
+                    title: Text('Confirm Delete'),
+                    content: Text('Are you sure you want to delete this mission?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                            await deleteAndMarkMissionAsDone();
+                            Navigator.pop(context);
+                        },
+                        child: Text('Delete', style: TextStyle(color: red)),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }:null,
+            icon: Icon(Icons.delete),
+          )
+
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -253,9 +289,15 @@ class _EditMissionPageState extends State<EditMissionPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Mission Details',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkBlue),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Mission Details',
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: darkBlue),
+                          ),
+                          Text('${widget.mission.date} - ${widget.mission.time}', style: TextStyle(color: darkGrey)),
+                        ],
                       ),
                       SizedBox(height: 10),
                       Text('Car: ${widget.mission.car}', style: TextStyle(color: darkGrey)),

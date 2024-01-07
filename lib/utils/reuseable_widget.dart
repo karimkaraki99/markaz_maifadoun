@@ -449,7 +449,55 @@ class _MissionTypeDropdownState extends State<MissionTypeDropdown> {
     );
   }
 }
+class DateSelectionWidget extends StatefulWidget {
+  final DateTime initialDate;
+  final Function(DateTime) onDateSelected;
 
+  const DateSelectionWidget({
+    super.key,
+    required this.initialDate,
+    required this.onDateSelected,
+  });
+
+  @override
+  State<DateSelectionWidget> createState() => _DateSelectionWidgetState();
+}
+
+class _DateSelectionWidgetState extends State<DateSelectionWidget> {
+  late DateTime selectedDate;
+
+  @override
+
+
+  void initState() {
+    super.initState();
+    selectedDate = widget.initialDate;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: () async {
+        final pickedDate = await showDatePicker(
+          context: context,
+          initialDate: selectedDate,
+          firstDate:
+
+          DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+
+        if (pickedDate != null) {
+          setState(() {
+            selectedDate = pickedDate;
+            widget.onDateSelected(selectedDate);
+          });
+        }
+      },
+      icon: Icon(Icons.calendar_month),
+    );
+  }
+}
 
 
 
