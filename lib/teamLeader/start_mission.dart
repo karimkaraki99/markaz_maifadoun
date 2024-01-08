@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/database/users.dart';
 import '../database/missions.dart';
@@ -38,6 +37,7 @@ class _StartMissionState extends State<StartMission> {
   String? selectedDate;
   String? selectedTime;
   String? selectedMissionType = "Emergency";
+  bool pressedStartMission = false;
 
 
 
@@ -306,16 +306,22 @@ class _StartMissionState extends State<StartMission> {
                     ),
 
                     SizedBox(height: 20,),
-                    CustomButton(
+                    pressedStartMission?CircularProgressIndicator():CustomButton(
                       text: 'Submit',
                       color: blue,
                       toDo: () async {
+                        setState(() {
+                          pressedStartMission = true;
+                        });
                         if (_formKey.currentState!.validate() &&
                             selectedCar != null &&
                             selectedTeamLeader != null &&
                             selectedDriver != null) {
                           await formatDateTime(selectedDateTime!);
-                          _createMission();
+                          await _createMission();
+                          setState(() {
+                            pressedStartMission = false;
+                          });
 
                         } else {
                           if (selectedCar == null) {
@@ -333,6 +339,9 @@ class _StartMissionState extends State<StartMission> {
                           if (selectedDriver == null) {
                             driverKey.currentState?.validate();
                           }
+                          setState(() {
+                            pressedStartMission = false;
+                          });
                         }
                       },
                     ),

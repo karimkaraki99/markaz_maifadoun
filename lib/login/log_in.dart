@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/mainscreens/home.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
-import '../database/users.dart';
 import '../utils/image_utils.dart';
 import '../utils/reuseable_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
     bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
 
     User? user = auth.currentUser;
-    if (user != null || isLoggedIn) {
+    if (user != null || isLoggedIn ) {
       navigateToHomePage();
 
       // Save the logged-in phone number to SharedPreferences
@@ -235,25 +234,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text("Return to log in Screen", style: TextStyle(color: yellow)),
                 )
                     : const Text(""),
-
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomePage())
-                    );
-                  },
-                  child: const Text("home", style: TextStyle(color: Colors.red),),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => ShowUsers())
-                    );
-                  },
-                  child: const Text("Users", style: TextStyle(color: Colors.red),),
-                )
               ],
             ),
           ),

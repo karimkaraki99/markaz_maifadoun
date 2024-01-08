@@ -26,6 +26,7 @@ class _ProfileState extends State<Profile> {
   bool isDriver = false;
   String year = '';
   String driver = '';
+  int intRole=0;
 
   Future<void> initializeData() async {
     try {
@@ -33,6 +34,7 @@ class _ProfileState extends State<Profile> {
       await Users.initializeLoggedInUser();
 
       setState(() {
+        intRole= Users.loggedInUser!.role??0;
         name = '${Users.loggedInUser!.firstName} ${Users.loggedInUser!.lastName}';
         rank = '${Users.loggedInUser!.userRank}';
         role = '${Users.loggedInUser!.userRole}';
@@ -118,60 +120,61 @@ class _ProfileState extends State<Profile> {
           ),
           Positioned(
             top: MediaQuery.of(context).padding.top +
-                AppBar().preferredSize.height,
+                AppBar().preferredSize.height+40,
             left: 0,
             right: 0,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: Container(
-                              width: 170,
-                              height: 170,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color:yellow,
-                                  width: 4.0,
+            child: SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: blue,
+                                  border: Border.all(
+                                    color:yellow,
+                                    width: 4.0,
+                                  ),
                                 ),
-                              ),
-                              child: const CircleAvatar(
-                                radius: 50,
-                                backgroundImage: AssetImage('assets/test_profile.png'),
+                                child: Icon(intRole ==2 || intRole ==1?Icons.medical_services:Icons.person,color: white,size: 40,),
                               ),
                             ),
-                          ),
-
-                        ],
-                      ),
-                  SizedBox(height: 20.0),
-                  Column(
-                    children: [
-                      Text(
-                        name,
-                        style: TextStyle(fontSize: 24.0,fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 8.0),
-                      Text(
-                        '$rank - $role $driver',
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                      SizedBox(height: 20,),
-                    ],
-                  ),
-                  CustomButton(text: _editProfile, color: blue, toDo: (){
-                    Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => EditProfile(phoneNumber: phoneNumber,)),
-                    );
-                  }),
-                 ViewProfile(rank: rank, role: role, phoneNumber: phoneNumber, dutyDay: dutyDay, dutyDay2: dutyDay2, isDriver: isDriver, year: year)
-
-                ],
+              
+                          ],
+                        ),
+                    SizedBox(height: 30.0),
+                    Column(
+                      children: [
+                        Text(
+                          name,
+                          style: TextStyle(fontSize: 24.0,fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 8.0),
+                        Text(
+                          '$rank - $role $driver',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        SizedBox(height: 30,),
+                      ],
+                    ),
+                    CustomButton(text: _editProfile, color: blue, toDo: (){
+                      Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => EditProfile(phoneNumber: phoneNumber,)),
+                      );
+                    }),
+                    SizedBox(height: 10,),
+                   ViewProfile(rank: rank, role: role, phoneNumber: phoneNumber, dutyDay: dutyDay, dutyDay2: dutyDay2, isDriver: isDriver, year: year)
+              
+                  ],
+                ),
               ),
             ),
           ),

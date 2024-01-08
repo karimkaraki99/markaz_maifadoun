@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../admin/add_member.dart';
+import '../admin/view_members.dart';
 import '../database/users.dart';
 import '../teamLeader/shifts.dart';
 import 'checkup.dart';
@@ -24,6 +25,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   int  role = 0;
+  bool isFrozen=false;
 
 
   Future<void> initializeData() async {
@@ -31,10 +33,12 @@ class _HomePageState extends State<HomePage> {
       await Users.initUsersLists();
       await Users.initializeLoggedInUser();
       setState(() {
+        isFrozen = Users.loggedInUser?.isFrozen ?? false;
         role = Users.loggedInUser?.role ?? 0;
-        print('role is $role');
       });
-
+      if(isFrozen){
+        signOut();
+      }
 
       if (role == 2 || role == 1){
         FirebaseMessaging.instance.subscribeToTopic('admin');
@@ -180,6 +184,28 @@ class _HomePageState extends State<HomePage> {
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context)=>  Shifts()  )
+                    );
+                  },
+                ):Container(),
+                role ==2? ListTile(
+                  leading: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.rectangle,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(15.0),
+                          topRight: Radius.circular(5.0),
+                          bottomLeft: Radius.circular(5.0),
+                          bottomRight: Radius.circular(10.0),
+                        ),
+                        color: blue
+                    ),
+                    padding: EdgeInsets.all(8.0),
+                    child: Image.asset('assets/members-icon.png',height: 25,width: 25,color: yellow,),
+                  ),
+                  title: Text('Members',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context)=>  ShowUsers()  )
                     );
                   },
                 ):Container(),

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -14,6 +14,7 @@ class Users {
   final int duty2;
   final String year;
   final bool onMission;
+  final bool isFrozen;
 
   final String userRole;
   final String userRank;
@@ -31,7 +32,8 @@ class Users {
     required this.duty,
     required this.duty2,
     required this.year,
-    required this.onMission
+    required this.onMission,
+    required this.isFrozen
   })   : userRole = _calculateUserRole(role,rank),
         userRank = _calculateUserRank(rank),
         dutyDay = _calculateUserDutyDay(duty),
@@ -169,7 +171,8 @@ class Users {
           duty: userData['duty'] ?? 0,
           duty2: userData['duty2'] ?? 0,
           year: userData['since'] ?? '',
-          onMission: userData['onMission']?? false
+          onMission: userData['onMission']?? false,
+          isFrozen: userData['isFrozen'] ?? false,
         );
 
         userList.add(user);
@@ -219,58 +222,12 @@ class Users {
         duty: map['duty'] ?? 0,
         duty2: map['duty2'] ?? 0,
         year: map['since'] ?? '',
-        onMission: map['onMission']?? false
+        onMission: map['onMission']?? false,
+        isFrozen: map['isFrozen'] ?? false,
     );
   }
 
 }
 
 
-class ShowUsers extends StatefulWidget {
-  const ShowUsers({Key? key}) : super(key: key);
-
-  @override
-  State<ShowUsers> createState() => _ShowUsersState();
-}
-
-class _ShowUsersState extends State<ShowUsers> {
-  List<Users> _userList = [];
-
-  @override
-  void initState() {
-    super.initState();
-    getUsersData();
-
-  }
-
-  Future<void> getUsersData() async {
-    List<Users> users = await Users.getUsers();
-    setState(() {
-      _userList = users;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Users'),
-      ),
-      body: Container(
-        // Remove fixed height and width constraints
-        child: ListView.builder(
-          itemCount: _userList.length,
-          itemBuilder: (context, index) {
-            Users user = _userList[index];
-            return ListTile(
-              title: Text(user.firstName + ' ' + user.lastName),
-              subtitle: Text('Phone Number: ${user.phoneNumber}'),
-              // Add more user details as needed
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
 

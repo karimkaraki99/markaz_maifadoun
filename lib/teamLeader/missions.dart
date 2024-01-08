@@ -19,7 +19,7 @@ class Missions extends StatefulWidget {
 class _MissionsState extends State<Missions> {
   bool active = true;
   DateTime selectedDateTime = DateTime.now();
-  String? dateString ;
+  String? dateString =DateFormat('yyyy-MM-dd').format(DateTime.now());
   List<Mission> _historyMissions = [];
 
   Future<void> loadMissionsByDate( ) async {
@@ -31,6 +31,11 @@ class _MissionsState extends State<Missions> {
     } catch (e) {
       print("Error loading missions: $e");
     }
+  }
+  @override
+  void initState() {
+    loadMissionsByDate( );
+    super.initState();
   }
 
   @override
@@ -141,7 +146,7 @@ class _MissionsState extends State<Missions> {
                               bottomLeft: (index % 2 != 0) ? Radius.circular(15.0) : Radius.circular(5.0),
                               bottomRight: (index % 2 != 0) ? Radius.circular(5.0) : Radius.circular(15.0),
                             ),
-                            color: index%2!=0?Colors.grey.shade200:Colors.grey.shade400
+                            color: index%2!=0?Colors.grey.shade300:Colors.grey.shade400
                         ),
                         child: ListTile(
                           leading: Text(mission.car,style: TextStyle(

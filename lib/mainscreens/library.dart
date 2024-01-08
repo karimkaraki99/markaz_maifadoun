@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:markaz_maifadoun/utils/colors_util.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../utils/reuseable_widget.dart';

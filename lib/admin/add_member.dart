@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../utils/colors_util.dart';
 
 class AddUserPage extends StatefulWidget {
@@ -17,6 +16,7 @@ class _AddUserPageState extends State<AddUserPage> {
   bool isDriver = false;
   bool isActive = false;
   bool onMission = false;
+  bool isFrozen = false;
   int role = 0;
   int rank = 0;
   int duty = 0;
@@ -323,7 +323,8 @@ class _AddUserPageState extends State<AddUserPage> {
         'phoneNumber': phoneNumberController.text,
         'duty': duty,
         'duty2':duty2,
-        'onMission':onMission
+        'onMission':onMission,
+        'isFrozen': isFrozen,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

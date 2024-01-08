@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import '../database/users.dart';
 import '../database/vehicle.dart';
+import '../login/log_in.dart';
 import '../utils/colors_util.dart';
 import '../utils/reuseable_widget.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ActiveMembersScreen extends StatefulWidget {
   const ActiveMembersScreen({Key? key}) : super(key: key);
@@ -14,18 +18,52 @@ class ActiveMembersScreen extends StatefulWidget {
 
 class _ActiveMembersScreenState extends State<ActiveMembersScreen> {
   bool isLoading = true;
+  bool isFrozen = false;
   @override
   void initState() {
     loading();
+    checkIsFrozen();
     super.initState();
 
   }
   Future<void> loading() async{
-    await Users.initUsersLists().then((value){
-      setState(() {
+    await Users.initUsersLists().then((value) async {
+      setState(()  {
         isLoading = false;
       });
     });
+  }
+  Future<void> checkIsFrozen() async{
+    await Users.initializeLoggedInUser();
+    isFrozen =  await Users.loggedInUser?.isFrozen ?? false;
+    print('isFroezn : $isFrozen');
+    if(isFrozen){signOut();}
+  }
+
+  Future<void> signOut() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+
+    try {
+      await auth.signOut();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isLoggedIn', false);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+            (Route<dynamic> route) => false,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text("""You don't have authority"""),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    } catch (e) {
+      print("Error signing out: $e");
+    }
   }
 
 
@@ -196,10 +234,38 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
             subtitle: Text('Role: ${user.userRole}',
                 style: TextStyle(
                     color: darkGrey, fontWeight: FontWeight.w300)),
-            trailing: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.phone, color: Colors.green),
-            ),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    final String phoneNumber = user.phoneNumber;
+                    final Uri launchUri = Uri(
+                      scheme: 'tel',
+                      path: phoneNumber,
+                    );
+                    if (await canLaunchUrl(launchUri)) {
+                      await launchUrl(launchUri);
+                    } else {
+                      print('Could not launch phone call');
+                    }
+                  },
+                  icon: const Icon(Icons.phone, color: Colors.green),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    final String phoneNumber = user.phoneNumber;
+                    final String uriString = 'https://wa.me/961$phoneNumber';
+                    if (await canLaunchUrl(Uri.parse(uriString))) {
+                      await launchUrl(Uri.parse(uriString));
+                    } else {
+                      print('Could not launch WhatsApp');
+                    }
+                  },
+                  icon: Icon(Icons.message, color: Colors.green),
+                ),
+              ],
+            )
           );
         },
     );
@@ -227,6 +293,7 @@ class _OnMissionMembersListState extends State<OnMissionMembersList> {
       _onMissionUsers = Users.onMissionMembers;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -228,7 +228,7 @@ class _EditProfileState extends State<EditProfile> {
                               )
                           ),
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               CustomButton(text: 'Back', color: blue, toDo: () {
                                 Navigator.of(context).pop(); // Close the dialog
