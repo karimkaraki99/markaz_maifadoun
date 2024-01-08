@@ -148,7 +148,7 @@ class _StartMissionState extends State<StartMission> {
       print('Users are on mission');
 
 
-      sendNotificationToAllUsers();
+      sendStartNotification();
 
       showSuccessDialogMessage();
 
@@ -186,7 +186,7 @@ class _StartMissionState extends State<StartMission> {
       },
     );
   }
-  Future<void> sendNotificationToAllUsers() async {
+  Future<void> sendStartNotification() async {
     try{
       await http.post(
           Uri.parse('https://fcm.googleapis.com/fcm/send'),
@@ -200,7 +200,7 @@ class _StartMissionState extends State<StartMission> {
             },
             'notification': {
               'title': 'New Mission!',
-              'body': '${selectedCar?.name} moved into a new mission, ${selectedDriver?.firstName} is the driver.',
+              'body': '${selectedCar?.name} moved into a new mission, ${selectedDriver?.firstName} ${selectedDriver?.lastName} is the driver.',
             },})).then((value){
         print(value.reasonPhrase);
       });

@@ -185,7 +185,7 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
           return ListTile(
             leading: Icon(
                 user.isDriver
-                    ? Icons.car_crash_sharp
+                    ? Icons.drive_eta
                     : (user.role == 2 || user.role == 1)
                     ? Icons.medical_services
                     : Icons.person,

@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/teamLeader/start_mission.dart';
 import '../database/missions.dart';
 import '../database/users.dart';
 import '../utils/colors_util.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:http/http.dart' as http;
 import 'missions.dart';
 
 class UserFetcher {
@@ -120,7 +122,7 @@ class _EditMissionPageState extends State<EditMissionPage> {
         widget.mission.isActive = false;
         showSuccessDoneMessage( );
       });
-
+      sendBackNotification();
       print('Marked mission as done successfully');
     } catch (e) {
       print('Error marking mission as done: $e');
@@ -231,7 +233,30 @@ class _EditMissionPageState extends State<EditMissionPage> {
       print('Error deleting mission: $e');
     }
   }
+  Future<void> sendBackNotification() async {
+    try{
+      await http.post(
+          Uri.parse('https://fcm.googleapis.com/fcm/send'),
+          headers:<String,String>{'Content-Type':'application/json',
+            'Authorization':'key=AAAALeyHDpI:APA91bEAkTrkng8nW3Kbu0wq68Kp23FP6e6yrod275qmIs73TAs2Hdt2u7qcRUw4yTgtFT6QatmEvb8hXOIT7JecTzJppOf1mvWVnzfjFtfxp4QuRRJdQtSddLqieLl9dr_n_yjDcEgo'},
+          body:jsonEncode({
+            'to': "/topics/admin",
+            'data': {
+              'via': 'FlutterFire Cloud Messaging!!!',
+              'count': '',
+            },
+            'notification': {
+              'title': 'Mission Accomplished!',
+              'body': '$selectedCar is back',
+            },})).then((value){
+        print(value.reasonPhrase);
+      });
 
+      print('Success notification sent to all users');
+    } catch (e) {
+      print('Error sending success notification: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -412,4 +437,5 @@ class _EditMissionPageState extends State<EditMissionPage> {
       ),
     );
   }
+
 }
