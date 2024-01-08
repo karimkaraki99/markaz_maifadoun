@@ -184,8 +184,9 @@ class _MissionsState extends State<Missions> {
             MaterialPageRoute(builder: (context) => StartMission()),
           );
         },
-        child: Icon(Icons.add),
+        child: Icon(Icons.add,color: white,),
         backgroundColor: blue,
+        elevation: 3,
       ),
     );
   }
