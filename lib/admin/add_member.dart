@@ -311,27 +311,39 @@ class _AddUserPageState extends State<AddUserPage> {
   Future<void> _addUser() async {
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference users = firestore.collection('users');
+    String phoneNumber = phoneNumberController.text;
 
     try {
-      await users.doc(phoneNumberController.text).set({
-        'fname': firstNameController.text,
-        'lname': lastNameController.text,
-        'isDriver': isDriver,
-        'isActive': isActive,
-        'role': role,
-        'rank': rank,
-        'phoneNumber': phoneNumberController.text,
-        'duty': duty,
-        'duty2':duty2,
-        'onMission':onMission,
-        'isFrozen': isFrozen,
-      });
+      // Check if the phone number already exists
+      bool phoneNumberExists = await _checkPhoneNumberExists(phoneNumber);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('User added successfully!'),
-        ),
-      );
+      if (phoneNumberExists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Phone number already in use!'),
+          ),
+        );
+      } else {
+        await users.doc(phoneNumber).set({
+          'fname': firstNameController.text,
+          'lname': lastNameController.text,
+          'isDriver': isDriver,
+          'isActive': isActive,
+          'role': role,
+          'rank': rank,
+          'phoneNumber': phoneNumber,
+          'duty': duty,
+          'duty2': duty2,
+          'onMission': onMission,
+          'isFrozen': isFrozen,
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('User added successfully!'),
+          ),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -340,4 +352,13 @@ class _AddUserPageState extends State<AddUserPage> {
       );
     }
   }
+
+  Future<bool> _checkPhoneNumberExists(String phoneNumber) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    CollectionReference users = firestore.collection('users');
+
+    DocumentSnapshot snapshot = await users.doc(phoneNumber).get();
+    return snapshot.exists;
+  }
+
 }

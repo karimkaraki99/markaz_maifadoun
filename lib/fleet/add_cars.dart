@@ -171,11 +171,11 @@ class _AddCarPageState extends State<AddCarPage> {
     CollectionReference cars = firestore.collection('cars');
 
     try {
-      String newCarId = cars.doc().id;
+      String name = nameController.text;
 
-      await cars.doc(newCarId).set({
-        'id': newCarId,
-        'name': nameController.text,
+      await cars.doc(name).set({
+        'id': name,
+        'name': name,
         'isActive': isActive,
         'onMission': onMission,
         'type': type,
@@ -194,4 +194,5 @@ class _AddCarPageState extends State<AddCarPage> {
       );
     }
   }
+
 }
