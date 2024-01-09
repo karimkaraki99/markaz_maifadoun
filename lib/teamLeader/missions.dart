@@ -18,6 +18,7 @@ class Missions extends StatefulWidget {
 
 class _MissionsState extends State<Missions> {
   bool active = true;
+  bool historyLoading=true;
   DateTime selectedDateTime = DateTime.now();
   String? dateString =DateFormat('yyyy-MM-dd').format(DateTime.now());
   List<Mission> _historyMissions = [];
@@ -70,6 +71,7 @@ class _MissionsState extends State<Missions> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
+                  const SizedBox(width: 5,),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
@@ -107,6 +109,7 @@ class _MissionsState extends State<Missions> {
                     ),
 
                   ),
+                  const SizedBox(width: 5,),
                 ],
               ),
             ),

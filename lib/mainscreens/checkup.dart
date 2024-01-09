@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:markaz_maifadoun/teamLeader/start_mission.dart';
 import 'package:markaz_maifadoun/utils/colors_util.dart';
-
 import '../database/vehicle.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CheckUp extends StatefulWidget {
   const CheckUp({Key? key}) : super(key: key);
@@ -12,6 +13,9 @@ class CheckUp extends StatefulWidget {
 
 class _CheckUpState extends State<CheckUp> {
   bool clinic = false;
+  Car? selectedCar;
+  TextEditingController vehicleCheckupController = TextEditingController();
+  TextEditingController clinicCheckupController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -19,410 +23,90 @@ class _CheckUpState extends State<CheckUp> {
       body: Column(
         children: [
           SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-          Align(
-            alignment: Alignment.center,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.9,
-              height: MediaQuery.of(context).size.height * 0.07,
+          ListTile(
+            title: Container(
               decoration: BoxDecoration(
                 color: darkBlue,
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(10.0),
               ),
               child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(width: MediaQuery.of(context).size.width*0.02,),
-                  Expanded(child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        clinic = false;
-                      });
-                    },
-                    child: Expanded(child: Text("Vehicle Checkup", style: TextStyle(color: white,fontSize: 12)),),
-                    style: ButtonStyle(
-                      backgroundColor: clinic?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5)
-                        )
-                      )
-                    ),
-                  ),),
-                  Expanded(child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        clinic = true;
-                      });
-                    },
-                    child: Expanded(child: Text("Clinic Checkup", style: TextStyle(color: white)),),
-                    style: ButtonStyle(
-                      backgroundColor: !clinic?MaterialStateProperty.all<Color>(darkBlue):MaterialStateProperty.all<Color>(grey),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  const SizedBox(width: 5,),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          clinic = false;
+                        });
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(!clinic ? grey : darkBlue),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                           RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5)
-                          )
-                      )
+                              borderRadius: BorderRadius.circular(5.0)
+                          ),
+                        ),
+                      ),
+                      child: Text("Vehicle Checkup", style: TextStyle(color: white)),
                     ),
-                  ),),
-                  SizedBox(width: MediaQuery.of(context).size.width*0.02,),
+                  ),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          clinic = true;
+                        });
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(clinic ? grey : darkBlue),
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0),
+                          ),
+                        ),
+                      ),
+                      child: Text("Clinic Checkup", style: TextStyle(color: white)),
+                    ),
+                  ),
+                  const SizedBox(width: 5,),
                 ],
               ),
             ),
           ),
-          SizedBox(height: 16.0),
-          clinic ? CheckUpForm() : VehicleCheckup(),
+          const SizedBox(height: 16.0),
+          !clinic?CarDropDown(
+            color: yellow,
+            onCarSelected: (car) {
+              setState(() {
+                selectedCar = car;
+              });
+            },
+          ):Container(),
+          !clinic? Form(
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text('Stretcher'),
+                ),
+                ListTile(
+                  title: Text('Stretcher'),
+                  ),
+              ],
+            ),
+          )
+              :Form(
+              child: Column(
+                children: [
+
+                ],
+              ))
+          ,
         ],
       ),
     );
   }
+
 }
 
-class CheckUpForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Clinic Checkup List', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-            TextField(label: 'Oxygen'),
-              CheckboxField(label: 'Gauze'),
-              CheckboxField(label: 'Sterile Gauze'),
-              CheckboxField(label: 'Bandage'),
-              CheckboxField(label: 'Plaster'),
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Edit'),
-                  style: ButtonStyle(backgroundColor:MaterialStateProperty.all<Color>(grey) ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Submit'),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
 
-class TextField extends StatelessWidget {
-  final String label;
-
-  const TextField({Key? key, required this.label}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 8.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Align to the right
-          children: [
-            Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-            Container(
-              width: 100.0, // Adjust the width as needed
-              child: TextFormField(
-                keyboardType: TextInputType.number,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 16.0),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Divider(
-            color: darkGrey,
-            thickness: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class CheckboxField extends StatelessWidget {
-  final String label;
-
-  const CheckboxField({Key? key, required this.label}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 8.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-            Checkbox(
-              value: false,
-              onChanged: (bool? value) {
-
-              },
-            ),
-          ],
-        ),
-        SizedBox(height: 16.0),
-        Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          child: Divider(
-            color: darkGrey,
-            thickness: 0.5,
-          ),
-        ),
-      ],
-    );
-  }
-}
-class VehicleCheckup extends StatefulWidget {
-  const VehicleCheckup({super.key});
-
-  @override
-  State<VehicleCheckup> createState() => _VehicleCheckupState();
-}
-
-class _VehicleCheckupState extends State<VehicleCheckup> {
-  final List<Widget> _checkuplist = [
-    Car1CheckUpForm(),
-    Car2CheckUpForm(),
-    Car3CheckUpForm(),
-    Car4CheckUpForm(),
-    Car5CheckUpForm(),
-  ];
-  int checkupIndex = 0;
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width:  MediaQuery.of(context).size.width * 1,
-              height: MediaQuery.of(context).size.height * 0.09,
-              child: CarsListScreen(),
-            ),
-          ],
-        ),
-        SizedBox(height:MediaQuery.of(context).size.height * 0.04 ,),
-        _checkuplist[checkupIndex],
-      ],
-    );
-  }
-}
-class Car1CheckUpForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Car 1 Checkup List', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-            CheckboxField(label: 'Stretcher'),
-            CheckboxField(label: 'Spinal Board'),
-            TextField(label: 'Oxygen'),
-            TextField(label: 'Handled Oxygen'),
-
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Edit'),
-                  style: ButtonStyle(backgroundColor:MaterialStateProperty.all<Color>(grey) ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Submit'),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-class Car2CheckUpForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Car 2 Checkup List', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-            CheckboxField(label: 'Splints'),
-            TextField(label: 'Oxygen'),
-            TextField(label: 'Handled Oxygen'),
-            CheckboxField(label: 'Bag'),
-
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Edit'),
-                  style: ButtonStyle(backgroundColor:MaterialStateProperty.all<Color>(grey) ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Submit'),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-class Car3CheckUpForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Car 3 Checkup List', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-            CheckboxField(label: 'CPR Board'),
-            CheckboxField(label: 'Chair'),
-            TextField(label: 'Oxygen'),
-            TextField(label: 'Handled Oxygen'),
-
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Edit'),
-                  style: ButtonStyle(backgroundColor:MaterialStateProperty.all<Color>(grey) ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Submit'),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-class Car4CheckUpForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Car 4 Checkup List', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-            CheckboxField(label: 'KED'),
-            CheckboxField(label: 'Trauma Bag'),
-            TextField(label: 'Oxygen'),
-            TextField(label: 'Handled Oxygen'),
-
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Edit'),
-                  style: ButtonStyle(backgroundColor:MaterialStateProperty.all<Color>(grey) ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Submit'),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-class Car5CheckUpForm extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Form(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Car 5 Checkup List', style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18)),
-            TextField(label: 'Gauze'),
-            CheckboxField(label: 'Spinal Board'),
-            TextField(label: 'Oxygen'),
-            TextField(label: 'Handled Oxygen'),
-
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Edit'),
-                  style: ButtonStyle(backgroundColor:MaterialStateProperty.all<Color>(grey) ),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle submit logic
-                  },
-                  child: Text('Submit'),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}

@@ -26,7 +26,7 @@ class Car {
     bool isLoading = true;
     allCarsList = await getCars();
     activeCarsList = allCarsList.where((car) => car.isActive).toList();
-    activeNowCarsList = allCarsList.where((car) => !car.onMission && car.isActive).toList();
+    activeNowCarsList = activeCarsList.where((car) => !car.onMission).toList();
     isLoading= false;
     return isLoading;
   }

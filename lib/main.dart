@@ -34,6 +34,12 @@ Future<void> main()  async {
       Permission.notification.request();
     }
   });
+  // await Permission.launchApps.status.then((status) {
+  //   if (status.isDenied) {
+  //     // Permission is denied, request it
+  //     Permission.launchApps.request();
+  //   }
+  // });
 
 
 

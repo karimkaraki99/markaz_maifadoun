@@ -234,9 +234,7 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
             subtitle: Text('Role: ${user.userRole}',
                 style: TextStyle(
                     color: darkGrey, fontWeight: FontWeight.w300)),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
+            trailing:
                 IconButton(
                   onPressed: () async {
                     final String phoneNumber = user.phoneNumber;
@@ -252,20 +250,6 @@ class _ActiveMembersListState extends State<ActiveMembersList> {
                   },
                   icon: const Icon(Icons.phone, color: Colors.green),
                 ),
-                IconButton(
-                  onPressed: () async {
-                    final String phoneNumber = user.phoneNumber;
-                    final String uriString = 'https://wa.me/961$phoneNumber';
-                    if (await canLaunchUrl(Uri.parse(uriString))) {
-                      await launchUrl(Uri.parse(uriString));
-                    } else {
-                      print('Could not launch WhatsApp');
-                    }
-                  },
-                  icon: Icon(Icons.message, color: Colors.green),
-                ),
-              ],
-            )
           );
         },
     );
@@ -319,8 +303,19 @@ class _OnMissionMembersListState extends State<OnMissionMembersList> {
                 style: TextStyle(
                     color: darkGrey, fontWeight: FontWeight.w300)),
             trailing: IconButton(
-              onPressed: () {},
-              icon: Icon(Icons.phone, color: green),
+              onPressed: () async {
+                final String phoneNumber = user.phoneNumber;
+                final Uri launchUri = Uri(
+                  scheme: 'tel',
+                  path: phoneNumber,
+                );
+                if (await canLaunchUrl(launchUri)) {
+                  await launchUrl(launchUri);
+                } else {
+                  print('Could not launch phone call');
+                }
+              },
+              icon: const Icon(Icons.phone, color: Colors.green),
             ),
           );
         },

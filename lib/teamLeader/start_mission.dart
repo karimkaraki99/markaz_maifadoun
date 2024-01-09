@@ -33,7 +33,7 @@ class _StartMissionState extends State<StartMission> {
   Color colorCar = darkBlue;
   Color colorDriver = darkBlue;
   Color colorTeamLeader = darkBlue;
-  DateTime? selectedDateTime;
+  DateTime selectedDateTime = DateTime.now();
   String? selectedDate;
   String? selectedTime;
   String? selectedMissionType = "Emergency";

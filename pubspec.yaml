@@ -56,6 +56,8 @@ dev_dependencies:
   firebase_messaging: ^14.7.10
   permission_handler: ^11.1.0
   http: ^1.1.2
+  url_launcher: ^6.0.20
+  device_apps: ^2.2.0
 
 flutter:
 

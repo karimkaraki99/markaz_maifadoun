@@ -4,6 +4,7 @@ import 'package:markaz_maifadoun/mainscreens/profile.dart';
 
 import '../utils/colors_util.dart';
 import '../utils/reuseable_widget.dart';
+
 class EditProfile extends StatefulWidget {
   final String phoneNumber;
   EditProfile({super.key,required this.phoneNumber});
@@ -133,36 +134,28 @@ class _EditProfileState extends State<EditProfile> {
           ),
           Positioned(
             top: MediaQuery.of(context).padding.top +
-                AppBar().preferredSize.height,
+                AppBar().preferredSize.height+30,
             left: 0,
             right: 0,
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(50),
-                        child: Container(
-                          width: 170,
-                          height: 170,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color:yellow,
-                              width: 4.0,
-                            ),
-                          ),
-                          child: const CircleAvatar(
-                            radius: 50,
-                            backgroundImage: AssetImage('assets/test_profile.png'),
-                          ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50),
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: blue,
+                        border: Border.all(
+                          color:yellow,
+                          width: 4.0,
                         ),
                       ),
-                      IconButton(onPressed: (){}, icon: Icon(Icons.camera_alt , size: 40,color: yellow,))
-                    ],
+                      child: Icon(Icons.person,color: white,size: 40,),
+                    ),
                   ),
                   SizedBox(height: 20.0),
                   Form(
