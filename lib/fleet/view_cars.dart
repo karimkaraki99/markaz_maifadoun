@@ -1,45 +1,44 @@
 import 'package:flutter/material.dart';
-import '../database/users.dart';
+import '../database/vehicle.dart'; // Import your vehicle class
 import '../utils/colors_util.dart';
-import 'add_member.dart';
-import 'edit_members.dart';
+import 'add_cars.dart';
+import 'edit_cars.dart';
 
-class ShowUsers extends StatefulWidget {
-  const ShowUsers({Key? key}) : super(key: key);
+class ShowVehicles extends StatefulWidget {
+  const ShowVehicles({Key? key}) : super(key: key);
 
   @override
-  State<ShowUsers> createState() => _ShowUsersState();
+  State<ShowVehicles> createState() => _ShowVehiclesState();
 }
 
-class _ShowUsersState extends State<ShowUsers> {
-  List<Users> _originalUserList = [];
-  List<Users> _filteredUserList = [];
+class _ShowVehiclesState extends State<ShowVehicles> {
+  List<Car> _originalVehicleList = [];
+  List<Car> _filteredVehicleList = [];
   bool isLoading = true;
   TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    getUsersData();
+    getVehiclesData();
   }
 
-  Future<void> getUsersData() async {
-    List<Users> users = await Users.getUsers();
+  Future<void> getVehiclesData() async {
+    List<Car> vehicles = await Car.getCars();
     setState(() {
-      _originalUserList = users;
-      _filteredUserList = users;
+      _originalVehicleList = vehicles;
+      _filteredVehicleList = vehicles;
       isLoading = false;
     });
   }
 
-  List<Users> getFilteredUsers(String query) {
+  List<Car> getFilteredVehicles(String query) {
     if (query.isEmpty) {
-      return _originalUserList;
+      return _originalVehicleList;
     }
 
-    return _originalUserList.where((user) {
-      final fullName = '${user.firstName} ${user.lastName}'.toLowerCase();
-      return fullName.contains(query.toLowerCase());
+    return _originalVehicleList.where((vehicle) {
+      return vehicle.name.toLowerCase().contains(query.toLowerCase());
     }).toList();
   }
 
@@ -47,7 +46,7 @@ class _ShowUsersState extends State<ShowUsers> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Members'),
+        title: Text('Vehicles'),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -65,24 +64,22 @@ class _ShowUsersState extends State<ShowUsers> {
                     controller: _searchController,
                     onChanged: (query) {
                       setState(() {
-                        _filteredUserList = getFilteredUsers(query);
+                        _filteredVehicleList = getFilteredVehicles(query);
                       });
                     },
                     decoration: const InputDecoration(
-                      labelText: 'Search by Name',
+                      labelText: 'Search by Vehicle Name',
                       labelStyle: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.w500, // Slightly bolder label
+                        fontWeight: FontWeight.w500,
                       ),
                       prefixIcon: Icon(Icons.search, color: Colors.white),
                       border: InputBorder.none,
                     ),
-                    style: TextStyle(color: Colors.white), // Ensure text color is white
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ),
-
-
               GridView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
@@ -91,14 +88,14 @@ class _ShowUsersState extends State<ShowUsers> {
                   crossAxisSpacing: 20.0,
                   mainAxisSpacing: 20.0,
                 ),
-                itemCount: _filteredUserList.length,
+                itemCount: _filteredVehicleList.length,
                 itemBuilder: (context, index) {
-                  Users user = _filteredUserList[index];
+                  Car vehicle = _filteredVehicleList[index];
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => EditUserPage(user: user)),
+                        MaterialPageRoute(builder: (context) => EditCarPage(car: vehicle)),
                       );
                     },
                     child: Card(
@@ -109,12 +106,12 @@ class _ShowUsersState extends State<ShowUsers> {
                       ),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: user.isFrozen ? Colors.red.shade200 : Colors.blue.shade300,
+                          color: vehicle.isActive ?  Colors.blue.shade300 : Colors.red.shade300,
                           borderRadius: BorderRadius.circular(15.0),
-                          boxShadow: [
+                          boxShadow: const [
                             BoxShadow(
-                              color: user.isFrozen ? Colors.red.shade200 : Colors.grey.shade300,
-                              spreadRadius: 2,
+                              color: Colors.grey,
+                              spreadRadius: 1,
                               blurRadius: 5,
                               offset: Offset(0, 3),
                             ),
@@ -125,16 +122,16 @@ class _ShowUsersState extends State<ShowUsers> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              user.firstName + ' ' + user.lastName,
-                              style:  TextStyle(
+                              vehicle.name,
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16.0,
-                                color: darkBlue
+                                color: darkBlue,
                               ),
                             ),
                             SizedBox(height: 8.0),
                             Text(
-                              'Role: ${user.userRole}',
+                              'On Mission: ${vehicle.onMission ? 'Yes' : 'No'}',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 color: Colors.grey.shade800,
@@ -142,7 +139,7 @@ class _ShowUsersState extends State<ShowUsers> {
                             ),
                             SizedBox(height: 8.0),
                             Text(
-                              'Rank: ${user.userRank}',
+                              vehicle.type==0?'Type: Ambulance ':'Type: Pickup ',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 color: Colors.grey.shade800,
@@ -163,7 +160,7 @@ class _ShowUsersState extends State<ShowUsers> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddUserPage()),
+            MaterialPageRoute(builder: (context) => AddCarPage()),
           );
         },
         child: Icon(Icons.add,color: white,),

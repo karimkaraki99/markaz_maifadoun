@@ -1,5 +1,4 @@
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:markaz_maifadoun/login/log_in.dart';
@@ -13,6 +12,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import '../admin/add_member.dart';
 import '../admin/view_members.dart';
 import '../database/users.dart';
+import '../fleet/view_cars.dart';
 import '../teamLeader/shifts.dart';
 import 'checkup.dart';
 import 'library.dart';
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     ActiveMembersScreen(),
-    CheckUp(),
+    CheckupPage(),
     statusScreen(),
     libraryScreen(),
     Container(),
@@ -222,12 +222,12 @@ class _HomePageState extends State<HomePage> {
                         color: blue
                     ),
                     padding: EdgeInsets.all(8.0),
-                    child: Image.asset('assets/addmember-icon.png',height: 25,width: 25,color: yellow,),
+                    child: Image.asset('assets/car-icon.png',height: 25,width: 25,color: yellow,),
                   ),
-                  title: Text('Add Member',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
+                  title: Text('Vehicles',style: TextStyle(color: darkBlue,fontWeight: FontWeight.bold)),
                   onTap: () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (context)=>  AddUserPage()  )
+                        MaterialPageRoute(builder: (context)=>  ShowVehicles()  )
                     );
                   },
                 ):Container(),
